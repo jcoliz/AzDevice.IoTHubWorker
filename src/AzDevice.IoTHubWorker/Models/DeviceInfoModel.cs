@@ -91,6 +91,8 @@ public class DeviceInformationModel: IComponentModel
             Manufacturer = values["manufacturer"];
         if (values.ContainsKey("model"))
             DeviceModel = values["model"];
+        if (values.ContainsKey("swVersion"))
+            SoftwareVersion = values["swVersion"];
     }
 
     #endregion    

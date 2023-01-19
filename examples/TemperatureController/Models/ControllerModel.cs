@@ -50,19 +50,14 @@ public class ControllerModel : IRootModel
         { 
             "deviceInformation", 
             new DeviceInformationModel()
-            {
-                Manufacturer = "Example",
-                DeviceModel = "TemperatureController",
-                SoftwareVersion = "0.0.1"
-            }
         },
         {
             "thermostat1",
-            new ThermostatModel() { MaxTemp = 1000.0 }
+            new ThermostatModel()
         },
         {
             "thermostat2",
-            new ThermostatModel() { MaxTemp = 2000.0 }
+            new ThermostatModel()
         },
     };
 
