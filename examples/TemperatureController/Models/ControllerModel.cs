@@ -1,12 +1,22 @@
+using System.Text.Json.Serialization;
 using AzDevice.Models;
 
 public class ControllerModel : IRootModel
 {
-    public TimeSpan TelemetryPeriod => TimeSpan.FromSeconds(10);
+    #region Properties
 
-    public DeviceInformationModel DeviceInfo => Components["deviceInformation"] as DeviceInformationModel ?? throw new NotImplementedException();
+    [JsonPropertyName("serialNumber")]
+    public string? SerialNumber { get; } = "1234567890";
 
-    public IDictionary<string, IComponentModel> Components { get; } = new Dictionary<string, IComponentModel>()
+    #endregion
+
+    #region IRootModel
+
+    TimeSpan IRootModel.TelemetryPeriod => TimeSpan.FromSeconds(10);
+
+    DeviceInformationModel IRootModel.DeviceInfo => ((IRootModel)this).Components["deviceInformation"] as DeviceInformationModel ?? throw new NotImplementedException();
+
+    IDictionary<string, IComponentModel> IRootModel.Components { get; } = new Dictionary<string, IComponentModel>()
     {
         { 
             "deviceInformation", 
@@ -19,29 +29,34 @@ public class ControllerModel : IRootModel
         }
     };
 
-    public string dtmi => "dtmi:com:example:TemperatureController;2";
+    #endregion
 
-    public bool HasTelemetry => false;
+    #region IComponentModel
 
-    public Task<object> DoCommandAsync(string name, byte[] data)
+    string IComponentModel.dtmi => "dtmi:com:example:TemperatureController;2";
+
+    bool IComponentModel.HasTelemetry => false;
+
+    Task<object> IComponentModel.DoCommandAsync(string name, byte[] data)
     {
         throw new NotImplementedException();
     }
 
-    public IDictionary<string, object> GetTelemetry()
+    IDictionary<string, object> IComponentModel.GetTelemetry()
     {
         throw new NotImplementedException();
     }
 
-    public Task<string> LoadConfigAsync() => Task.FromResult<string>("No config needed");
+    Task<string> IRootModel.LoadConfigAsync() => Task.FromResult<string>("No config needed");
 
-    public object SetProperty(string key, object value)
+    object IComponentModel.SetProperty(string key, object value)
     {
         throw new NotImplementedException();
     }
 
-    public object GetProperties()
+    object IComponentModel.GetProperties()
     {
-        throw new NotImplementedException();
+        return this as ControllerModel;
     }
+    #endregion
 }

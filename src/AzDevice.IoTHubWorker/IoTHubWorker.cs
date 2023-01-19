@@ -467,7 +467,19 @@ public sealed class IoTHubWorker : BackgroundService
     /// </summary>
     private async Task UpdateReportedProperties()
     {
-        var update = _model.Components.ToDictionary(x => x.Key, x => x.Value.GetProperties());
+        // Create dictionary of root properties
+        var root = _model.GetProperties();
+        var j1 = JsonSerializer.Serialize(root);
+        var d1 = JsonSerializer.Deserialize<Dictionary<string, object>>(j1);
+
+        // Create dictionary of components with their properties
+        var d2 = _model.Components.ToDictionary(x => x.Key, x => x.Value.GetProperties());
+
+        // Merge them
+        var d3 = new[] { d1, d2 };
+        var update = d3.SelectMany(x => x!).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        // Convert to json and send them
         var json = JsonSerializer.Serialize(update);
         var resulttc = new TwinCollection(json);
         await iotClient!.UpdateReportedPropertiesAsync(resulttc);
