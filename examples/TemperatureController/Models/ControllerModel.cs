@@ -1,5 +1,4 @@
 using AzDevice.Models;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -96,7 +95,7 @@ public class ControllerModel : IRootModel
 
     Task<string> IRootModel.LoadConfigAsync() => Task.FromResult<string>("No config needed");
 
-    object IComponentModel.SetProperty(string key, object value)
+    object IComponentModel.SetProperty(string key, string jsonvalue)
     {
         throw new NotImplementedException();
     }

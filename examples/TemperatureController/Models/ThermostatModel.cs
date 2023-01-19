@@ -1,6 +1,4 @@
 using AzDevice.Models;
-using Newtonsoft.Json.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -92,12 +90,12 @@ public class ThermostatModel : IComponentModel
         };
     }
 
-    object IComponentModel.SetProperty(string key, object value)
+    object IComponentModel.SetProperty(string key, string jsonvalue)
     {
         if (key != "targetTemperature")
             throw new NotImplementedException();
 
-        return TargetTemp = (double)(JValue)value;
+        return TargetTemp = Convert.ToDouble(jsonvalue);
     }
 
     object IComponentModel.GetProperties()

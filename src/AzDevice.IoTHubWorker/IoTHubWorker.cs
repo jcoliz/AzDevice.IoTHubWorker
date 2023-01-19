@@ -436,7 +436,7 @@ public sealed class IoTHubWorker : BackgroundService
                                 fullpropname = $"{prop.Key}.{child.Name}";
 
                                 // Update the property
-                                var updated = component.SetProperty(child.Name,child.Value);
+                                var updated = component.SetProperty(child.Name,child.Value.ToString());
                                 _logger.LogInformation(LogEvents.PropertyComponentOK,"Property: Component OK. Updated {property} to {updated}",fullpropname,updated);
 
                                 // Acknowledge the request back to hub
@@ -448,7 +448,7 @@ public sealed class IoTHubWorker : BackgroundService
                     else
                     {
                         // Update the property
-                        var updated = _model.SetProperty(prop.Key,prop.Value);
+                        var updated = _model.SetProperty(prop.Key,prop.Value.ToString()!);
                         _logger.LogInformation(LogEvents.PropertyOK,"Property: OK. Updated {property} to {updated}",fullpropname,updated);
 
                         // Acknowledge the request back to hub

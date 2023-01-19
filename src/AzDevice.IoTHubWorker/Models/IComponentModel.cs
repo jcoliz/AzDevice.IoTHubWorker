@@ -8,7 +8,7 @@ public interface IComponentModel
 
     bool HasTelemetry { get; }
 
-    object SetProperty(string key, object value);
+    object SetProperty(string key, string jsonvalue);
 
     object GetProperties();
 

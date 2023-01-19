@@ -80,7 +80,7 @@ public class DeviceInformationModel: IComponentModel
         throw new NotImplementedException();
     }
 
-    object IComponentModel.SetProperty(string key, object value)
+    object IComponentModel.SetProperty(string key, string jsonvalue)
     {
         throw new NotImplementedException();
     }
