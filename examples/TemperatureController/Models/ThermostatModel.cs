@@ -107,7 +107,8 @@ public class ThermostatModel : IComponentModel
 
     void IComponentModel.SetInitialState(IDictionary<string, string> values)
     {
-        throw new NotImplementedException();
+        if (values.ContainsKey("targetTemperature"))
+            TargetTemp = Convert.ToDouble(values["targetTemperature"]);
     }
 
     #endregion
