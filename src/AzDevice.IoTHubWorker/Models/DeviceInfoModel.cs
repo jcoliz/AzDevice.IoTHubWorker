@@ -11,13 +11,13 @@ public class DeviceInformationModel
     public string ComponentID => "c";
 
     [JsonPropertyName("manufacturer")]
-    public string Manufacturer => "BrewHub";
+    public string? Manufacturer { get; set; }
 
     [JsonPropertyName("model")]
-    public string? DeviceModel => "Digital Distillery Controller DC-01";
+    public string? DeviceModel { get; set; }
 
     [JsonPropertyName("swVersion")]
-    public string? SoftwareVersion { get; set; } = "0.0.1";
+    public string? SoftwareVersion { get; set; }
 
     [JsonPropertyName("osName")]
     public string OperatingSystemName => RuntimeInformation.OSDescription;
