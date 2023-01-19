@@ -12,6 +12,19 @@ public class ControllerModel : IRootModel
 
     #endregion
 
+    #region Commands
+
+    protected Task<object> Reboot(string jsonparams)
+    {
+        var delay = (jsonparams.Length > 0) ? JsonSerializer.Deserialize<int>(jsonparams) : 0;
+
+        // TODO: Do something with this command
+
+        return Task.FromResult<object>(new());
+    }
+
+    #endregion
+
     #region IRootModel
 
     TimeSpan IRootModel.TelemetryPeriod => TimeSpan.FromSeconds(10);
@@ -43,20 +56,18 @@ public class ControllerModel : IRootModel
 
     #region IComponentModel
 
-    string IComponentModel.dtmi => "dtmi:com:example:TemperatureController;2";
+    [JsonIgnore]
+    public string dtmi => "dtmi:com:example:TemperatureController;2";
 
     bool IComponentModel.HasTelemetry => false;
 
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
-        if (name != "reboot")
-            throw new NotImplementedException();
-
-        var delay = (jsonparams.Length > 0) ? JsonSerializer.Deserialize<int>(jsonparams) : 0;
-
-        // TODO: Do something with this command
-
-        return Task.FromResult<object>(new());
+        return name switch
+        {
+            "reboot" => Reboot(jsonparams),
+            _ => throw new NotImplementedException($"Command {name} is not implemented on {dtmi}")
+        };
     }
 
     IDictionary<string, object> IComponentModel.GetTelemetry()

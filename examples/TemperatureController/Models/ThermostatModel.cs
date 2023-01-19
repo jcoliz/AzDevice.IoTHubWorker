@@ -19,16 +19,10 @@ public class ThermostatModel : IComponentModel
 
     #endregion
 
-    #region IComponentModel
-    string IComponentModel.dtmi => "dtmi:com:example:Thermostat;1";
+    #region Commands
 
-    bool IComponentModel.HasTelemetry => true;
-
-    Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
+    protected Task<object> GetMinMaxReport(string jsonparams)
     {
-        if (name != "getMaxMinReport")
-            throw new NotImplementedException();
-
         DateTimeOffset since =
             (jsonparams.Length > 0) ?
             JsonSerializer.Deserialize<DateTimeOffset>(jsonparams) :
@@ -38,6 +32,24 @@ public class ThermostatModel : IComponentModel
         return Task.FromResult<object>(result);
     }
 
+    #endregion
+
+    #region IComponentModel
+
+    [JsonIgnore]
+    public string dtmi => "dtmi:com:example:Thermostat;1";
+
+    bool IComponentModel.HasTelemetry => true;
+
+    Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
+    {
+        return name switch
+        {
+            "getMaxMinReport" => GetMinMaxReport(jsonparams),
+            _ => throw new NotImplementedException($"Command {name} is not implemented on {dtmi}")
+        };
+    }
+ 
     IDictionary<string, object> IComponentModel.GetTelemetry()
     {
         var dt = DateTimeOffset.UtcNow;
