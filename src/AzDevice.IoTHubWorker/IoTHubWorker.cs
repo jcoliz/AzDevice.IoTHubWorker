@@ -437,10 +437,9 @@ public sealed class IoTHubWorker : BackgroundService
     private async Task UpdateReportedProperties()
     {
         // For NOW, I am just going to update the "Info" component
-        var info = new DeviceInformationModel();
         var update = new Dictionary<string,object>()
         {
-            { "Info", info }
+            { "deviceInformation", _model.DeviceInfo }
         };
 
         var json = JsonSerializer.Serialize(update);
