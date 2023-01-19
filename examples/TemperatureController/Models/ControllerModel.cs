@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using AzDevice.Models;
 
@@ -39,7 +41,17 @@ public class ControllerModel : IRootModel
 
     Task<object> IComponentModel.DoCommandAsync(string name, byte[] data)
     {
-        throw new NotImplementedException();
+        if (name != "reboot")
+            throw new NotImplementedException();
+
+        var json = Encoding.UTF8.GetString(data);
+        var delay = 0;
+        if (json.Length > 0)
+            delay = JsonSerializer.Deserialize<int>(json);
+
+        // TODO: Do something with this command
+
+        return Task.FromResult<object>(new());
     }
 
     IDictionary<string, object> IComponentModel.GetTelemetry()
