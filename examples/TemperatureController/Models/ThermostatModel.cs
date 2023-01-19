@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 public class ThermostatModel : IComponentModel
-{
+{    
     #region Properties
 
     [JsonPropertyName("__t")]
@@ -19,18 +19,37 @@ public class ThermostatModel : IComponentModel
 
     #endregion
 
+    #region Telemetry
+
+    private double Temperature
+    {
+        get
+        {
+            var dt = DateTimeOffset.UtcNow;
+            return TargetTemp + dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0;            
+        }
+    }
+
+    #endregion
+
     #region Commands
 
     protected Task<object> GetMinMaxReport(string jsonparams)
     {
-        DateTimeOffset since =
-            (jsonparams.Length > 0) ?
-            JsonSerializer.Deserialize<DateTimeOffset>(jsonparams) :
-            DateTimeOffset.Now - TimeSpan.FromHours(1);
+        if (jsonparams.Length > 0)
+        {
+            var since = JsonSerializer.Deserialize<DateTimeOffset>(jsonparams);
+            _minMaxReport.StartTime = since;
 
-        var result = new MinMaxReportModel() { MaxTemp = 100.0, MinTemp = 200.0, StartTime = since, EndTime = DateTimeOffset.Now };
-        return Task.FromResult<object>(result);
+        }
+        return Task.FromResult<object>(_minMaxReport);
     }
+
+    #endregion
+
+    #region Fields
+
+    private MinMaxReportModel _minMaxReport = new MinMaxReportModel();
 
     #endregion
 
@@ -52,10 +71,21 @@ public class ThermostatModel : IComponentModel
  
     IDictionary<string, object> IComponentModel.GetTelemetry()
     {
-        var dt = DateTimeOffset.UtcNow;
+        // Take the reading
+        var reading = Temperature;
+
+        // Update the minmaxreport
+        _minMaxReport.MaxTemp = Math.Max(_minMaxReport.MaxTemp, reading);
+        _minMaxReport.MinTemp = Math.Min(_minMaxReport.MinTemp, reading);
+        _minMaxReport.EndTime = DateTimeOffset.Now;
+
+        // Obviously not a really good average! 🤣
+        _minMaxReport.AverageTemp = (_minMaxReport.MinTemp + _minMaxReport.MaxTemp + reading) / 3;
+
+        // Return the reading as telemetry
         return new Dictionary<string, object>()
         {
-            { "temperature", TargetTemp + dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0 }
+            { "temperature", reading }
         };
     }
 
