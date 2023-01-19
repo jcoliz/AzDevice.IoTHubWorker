@@ -32,7 +32,7 @@ public class ThermostatModel : IComponentModel
         var dt = DateTimeOffset.UtcNow;
         return new Dictionary<string, object>()
         {
-            { "temperature", dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0 }
+            { "temperature", TargetTemp + dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0 }
         };
     }
 
