@@ -64,9 +64,7 @@ public class ThermostatModel : IComponentModel
         if (key != "targetTemperature")
             throw new NotImplementedException();
 
-        double desired = (double)(JValue)value;
-        TargetTemp = desired;
-        return TargetTemp;
+        return TargetTemp = (double)(JValue)value;
     }
 
     object IComponentModel.GetProperties()
