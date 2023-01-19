@@ -150,41 +150,17 @@ public sealed class IoTHubWorker : BackgroundService
     {
         try
         {
-            var provisioningconfig = _config.GetSection("Provisioning");
-            if (!provisioningconfig.Exists())
-                throw new ApplicationException($"Failed. Please supply a Provisioning section in configuration");
+            var source = GetConfig("Provisioning:source");
+            var global_endpoint = GetConfig("Provisioning:global_endpoint");
+            var id_scope = GetConfig("Provisioning:id_scope"); 
+            var method = GetConfig("Provisioning:attestation:method");
+            var registration_id = GetConfig("Provisioning:attestation:registration_id");
+            var symmetric_key_value = GetConfig("Provisioning:attestation:symmetric_key:value");
 
-            var source = provisioningconfig["source"];
             if (source != "dps")
                 throw new ApplicationException($"Failed: source {source} not supported");
-
-            var global_endpoint = provisioningconfig["global_endpoint"];
-            if (global_endpoint is null)
-                throw new ApplicationException($"Failed. Please supply a Provisioning:global_endpoint value in configuration");
-
-            var id_scope = provisioningconfig["id_scope"];
-            if (id_scope is null)
-                throw new ApplicationException($"Failed. Please supply a Provisioning:id_scope value in configuration");
-
-            var attestation = provisioningconfig.GetSection("attestation");
-            if (!attestation.Exists())
-                throw new ApplicationException($"Failed. Please supply a Provisioning:attestation section in configuration");
-
-            var method = attestation["method"];
             if (method != "symmetric_key")
                 throw new ApplicationException($"Failed: method {method} not supported");
-
-            var registration_id = attestation["registration_id"];
-            if (registration_id is null)
-                throw new ApplicationException($"Failed. Please supply a Provisioning:attestation:registration_id value in configuration");
-
-            var symmetric_key = attestation.GetSection("symmetric_key");
-            if (!symmetric_key.Exists())
-                throw new ApplicationException($"Failed. Please supply a Provisioning:attestation:symmetric_key section in configuration");
-
-            var symmetric_key_value = symmetric_key["value"];
-            if (symmetric_key_value is null)
-                throw new ApplicationException($"Failed. Please supply a Provisioning:attestation:symmetric_key:value value in configuration");
 
             _logger.LogDebug(LogEvents.ProvisionConfig,"Provisioning: Found config for source:{source} method:{method}", source, method);
 
@@ -219,6 +195,11 @@ public sealed class IoTHubWorker : BackgroundService
             _logger.LogCritical(LogEvents.ProvisionError,"Provisioning: Error {message}", ex.Message);
             throw;
         }
+    }
+
+    private string GetConfig(string key)
+    {
+        return _config[key] ?? throw new ApplicationException($"Failed. Please supply {key} in configuration");
     }
 
     /// <summary>
