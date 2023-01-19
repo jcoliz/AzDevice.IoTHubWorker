@@ -24,7 +24,11 @@ public class ThermostatModel : IComponentModel
 
     Task<object> IComponentModel.DoCommandAsync(string name, byte[] data)
     {
-        throw new NotImplementedException();
+        if (name != "getMaxMinReport")
+            throw new NotImplementedException();
+
+        var result = new MinMaxReportModel() { MaxTemp = 100.0, MinTemp = 200.0, StartTime = DateTimeOffset.Now, EndTime = DateTimeOffset.Now };
+        return Task.FromResult<object>(result);
     }
 
     IDictionary<string, object> IComponentModel.GetTelemetry()
