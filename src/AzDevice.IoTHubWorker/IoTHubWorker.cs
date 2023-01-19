@@ -110,6 +110,17 @@ public sealed class IoTHubWorker : BackgroundService
                     numkeys += dictionary.Keys.Count;
                 }
 
+                foreach(var component in _model.Components)
+                {
+                    var section = initialstate.GetSection(component.Key);
+                    if (section.Exists())
+                    {
+                        var dictionary = section.GetChildren().ToDictionary(x => x.Key, x => x.Value);
+                        component.Value.SetInitialState(dictionary);
+                        numkeys += dictionary.Keys.Count;
+                    }
+                }
+
                 _logger.LogInformation(LogEvents.ConfigOK,"Initial State: OK Applied {numkeys} keys",numkeys);
             }
             else

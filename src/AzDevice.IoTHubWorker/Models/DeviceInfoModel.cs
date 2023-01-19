@@ -87,7 +87,10 @@ public class DeviceInformationModel: IComponentModel
     
     void IComponentModel.SetInitialState(IDictionary<string, string> values)
     {
-        throw new NotImplementedException();
+        if (values.ContainsKey("manufacturer"))
+            Manufacturer = values["manufacturer"];
+        if (values.ContainsKey("model"))
+            DeviceModel = values["model"];
     }
 
     #endregion    
