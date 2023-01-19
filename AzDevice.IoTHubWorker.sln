@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F5F805C4-88A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzDevice.IoTHubWorker", "src\AzDevice.IoTHubWorker\AzDevice.IoTHubWorker.csproj", "{3D4B1F21-CACD-4768-94ED-158809F1CE8F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{674F3832-DC82-4DBC-BCB1-74705ECD2578}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemperatureController", "examples\TemperatureController\TemperatureController.csproj", "{33BD6FEB-5659-457B-A91B-532A13D7A17D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,13 @@ Global
 		{3D4B1F21-CACD-4768-94ED-158809F1CE8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D4B1F21-CACD-4768-94ED-158809F1CE8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D4B1F21-CACD-4768-94ED-158809F1CE8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33BD6FEB-5659-457B-A91B-532A13D7A17D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33BD6FEB-5659-457B-A91B-532A13D7A17D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33BD6FEB-5659-457B-A91B-532A13D7A17D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33BD6FEB-5659-457B-A91B-532A13D7A17D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3D4B1F21-CACD-4768-94ED-158809F1CE8F} = {F5F805C4-88A8-4B9A-A3C0-E76507806BFC}
+		{33BD6FEB-5659-457B-A91B-532A13D7A17D} = {674F3832-DC82-4DBC-BCB1-74705ECD2578}
 	EndGlobalSection
 EndGlobal
