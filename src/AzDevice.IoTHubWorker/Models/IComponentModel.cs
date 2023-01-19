@@ -10,6 +10,8 @@ public interface IComponentModel
 
     object SetProperty(string key, object value);
 
+    object GetProperties();
+
     IDictionary<string,object> GetTelemetry();
 
     Task<object> DoCommandAsync(string name, byte[] data);

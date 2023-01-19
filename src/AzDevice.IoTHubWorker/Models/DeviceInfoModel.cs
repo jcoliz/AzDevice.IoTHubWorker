@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace AzDevice.Models;
 
-public class DeviceInformationModel
+public class DeviceInformationModel: IComponentModel
 {
     // Manufacturer of the device THIS CODE is running on
 
@@ -54,4 +54,30 @@ public class DeviceInformationModel
             return (double)mem / 1024.0;
         }
     }
+
+    #region IComponentModel
+    string IComponentModel.dtmi => "dtmi:azure:DeviceManagement:DeviceInformation;1";
+
+    bool IComponentModel.HasTelemetry => false;
+
+    Task<object> IComponentModel.DoCommandAsync(string name, byte[] data)
+    {
+        throw new NotImplementedException();
+    }
+
+    object IComponentModel.GetProperties()
+    {
+        return this as DeviceInformationModel;
+    }
+
+    IDictionary<string, object> IComponentModel.GetTelemetry()
+    {
+        throw new NotImplementedException();
+    }
+
+    object IComponentModel.SetProperty(string key, object value)
+    {
+        throw new NotImplementedException();
+    }
+    #endregion    
 }

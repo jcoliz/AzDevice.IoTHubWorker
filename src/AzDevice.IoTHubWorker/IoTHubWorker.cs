@@ -436,21 +436,12 @@ public sealed class IoTHubWorker : BackgroundService
     // Single update of all reported properties at once
     private async Task UpdateReportedProperties()
     {
-        // For NOW, I am just going to update the "Info" component
-        var update = new Dictionary<string,object>()
-        {
-            { "deviceInformation", _model.DeviceInfo }
-        };
-
+        var update = _model.Components.ToDictionary(x => x.Key, x => x.Value.GetProperties());
         var json = JsonSerializer.Serialize(update);
         var resulttc = new TwinCollection(json);
         await iotClient!.UpdateReportedPropertiesAsync(resulttc);
 
         _logger.LogDebug(LogEvents.PropertySendActuals,"Property: Updated reported properties as {update}",json);
     }
-#endregion
-
-#region Commands
-#endregion
-
+    #endregion
 }
