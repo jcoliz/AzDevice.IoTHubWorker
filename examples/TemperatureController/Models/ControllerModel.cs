@@ -11,11 +11,11 @@ public class ControllerModel : IRootModel
         SoftwareVersion = "0.0.1"
     };
 
-    public IDictionary<string, IComponentModel> Components => throw new NotImplementedException();
+    public IDictionary<string, IComponentModel> Components { get; } = new Dictionary<string,IComponentModel>();
 
     public string dtmi => "dtmi:com:example:TemperatureController;2";
 
-    public bool HasTelemetry => throw new NotImplementedException();
+    public bool HasTelemetry => false;
 
     public Task<object> DoCommandAsync(string name, byte[] data)
     {
