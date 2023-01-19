@@ -12,7 +12,6 @@ using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using Tomlyn;
 
 namespace AzDevice;
 
@@ -138,37 +137,68 @@ public sealed class IoTHubWorker : BackgroundService
     }
 
     /// <summary>
-    /// Provision this device according to the config supplied in config.toml
+    /// Provision this device according to the config supplied in "Provisioning" section
     /// </summary>
+    /// <remarks>
+    /// Note that the Provisioning section is designed to follow the format of the config.toml
+    /// used by Azure IoT Edge. So if you generate a config.toml for an edge device, you can
+    /// use it here. Just be sure to add the config.toml to the HostConfiguration during setup.
+    /// (See examples for how this is done.)
+    /// </remarks>
     /// <exception cref="ApplicationException">Thrown if provisioning fails (critical error)</exception>
     private async Task ProvisionDevice()
     {
         try
         {
-            using var reader = File.OpenText("config.toml");
-            var toml = reader.ReadToEnd();
-            var config = Toml.ToModel<ConfigModel>(toml);
+            var provisioningconfig = _config.GetSection("Provisioning");
+            if (!provisioningconfig.Exists())
+                throw new ApplicationException($"Failed. Please supply a Provisioning section in configuration");
 
-#if false
-            var options = new System.Text.Json.JsonSerializerOptions() { WriteIndented = true };
-            var json = System.Text.Json.JsonSerializer.Serialize(config,options);
-            Console.WriteLine("Config:");
-            Console.WriteLine(json);
-#endif
+            var source = provisioningconfig["source"];
+            if (source != "dps")
+                throw new ApplicationException($"Failed: source {source} not supported");
 
-            _logger.LogDebug(LogEvents.ProvisionConfig,"Provisioning: Loaded config");
+            var global_endpoint = provisioningconfig["global_endpoint"];
+            if (global_endpoint is null)
+                throw new ApplicationException($"Failed. Please supply a Provisioning:global_endpoint value in configuration");
+
+            var id_scope = provisioningconfig["id_scope"];
+            if (id_scope is null)
+                throw new ApplicationException($"Failed. Please supply a Provisioning:id_scope value in configuration");
+
+            var attestation = provisioningconfig.GetSection("attestation");
+            if (!attestation.Exists())
+                throw new ApplicationException($"Failed. Please supply a Provisioning:attestation section in configuration");
+
+            var method = attestation["method"];
+            if (method != "symmetric_key")
+                throw new ApplicationException($"Failed: method {method} not supported");
+
+            var registration_id = attestation["registration_id"];
+            if (registration_id is null)
+                throw new ApplicationException($"Failed. Please supply a Provisioning:attestation:registration_id value in configuration");
+
+            var symmetric_key = attestation.GetSection("symmetric_key");
+            if (!symmetric_key.Exists())
+                throw new ApplicationException($"Failed. Please supply a Provisioning:attestation:symmetric_key section in configuration");
+
+            var symmetric_key_value = symmetric_key["value"];
+            if (symmetric_key_value is null)
+                throw new ApplicationException($"Failed. Please supply a Provisioning:attestation:symmetric_key:value value in configuration");
+
+            _logger.LogDebug(LogEvents.ProvisionConfig,"Provisioning: Found config for source:{source} method:{method}", source, method);
 
             security = new SecurityProviderSymmetricKey(
-                config!.Provisioning!.Attestation!.RegistrationId,
-                config!.Provisioning!.Attestation!.SymmetricKey!.Value,
+                registration_id,
+                symmetric_key_value,
                 null);
 
             using ProvisioningTransportHandler transportHandler = new ProvisioningTransportHandlerHttp();
 
-            var endpoint = new Uri(config!.Provisioning!.GlobalEndpoint!);
+            var endpoint = new Uri(global_endpoint);
             var provClient = ProvisioningDeviceClient.Create(
                 endpoint.Host,
-                config.Provisioning.IdScope,
+                id_scope,
                 security,
                 transportHandler);
 
