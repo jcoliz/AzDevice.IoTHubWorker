@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 config.toml
+.env.ps1
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
