@@ -28,6 +28,10 @@ public class ControllerModel : IRootModel
                 DeviceModel = "TemperatureController",
                 SoftwareVersion = "0.0.1"
             }
+        },
+        {
+            "thermostat1",
+            new ThermostatModel()
         }
     };
 
