@@ -3,10 +3,15 @@ using System.Text.Json.Serialization;
 
 namespace AzDevice.Models;
 
+/// <summary>
+/// Standardized implementation of "dtmi:azure:DeviceManagement:DeviceInformation;1"
+/// </summary>
+/// <remarks>
+/// Describes the device THIS CODE is currently running on
+/// </remarks>
+
 public class DeviceInformationModel: IComponentModel
 {
-    // Manufacturer of the device THIS CODE is running on
-
     [JsonPropertyName("__t")]
     public string ComponentID => "c";
 
