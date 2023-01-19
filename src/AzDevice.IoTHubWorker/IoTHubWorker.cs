@@ -5,6 +5,7 @@ using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.Devices.Provisioning.Client;
 using Microsoft.Azure.Devices.Provisioning.Client.Transport;
 using Microsoft.Azure.Devices.Shared;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -30,20 +31,22 @@ public sealed class IoTHubWorker : BackgroundService
 
     private readonly IRootModel _model;
     private readonly ILogger<IoTHubWorker> _logger;
+    private readonly IConfiguration _config;
 
-#endregion
+    #endregion
 
-#region Fields
+    #region Fields
     private DeviceClient? iotClient;
     private SecurityProviderSymmetricKey? security;
     private DeviceRegistrationResult? result;
 #endregion
 
 #region Constructor
-    public IoTHubWorker(ILogger<IoTHubWorker> logger, IRootModel model)
+    public IoTHubWorker(ILogger<IoTHubWorker> logger, IRootModel model, IConfiguration config)
     {
         _logger = logger;
         _model = model;
+        _config = config;
     }
 #endregion
 
@@ -63,7 +66,7 @@ public sealed class IoTHubWorker : BackgroundService
             if (!string.IsNullOrEmpty(_model.dtmi))
                 _logger.LogInformation(LogEvents.ExecuteDeviceModel,"Model: {model}", _model.dtmi);
 
-            await LoadConfig();
+            await LoadInitialState();
             await ProvisionDevice();
             await OpenConnection();
             while (!stoppingToken.IsCancellationRequested)
@@ -87,19 +90,40 @@ public sealed class IoTHubWorker : BackgroundService
 #endregion
 
 #region Startup
-    private async Task LoadConfig()
+    /// <summary>
+    /// Loads initial state of components out of config
+    /// </summary>
+    /// <returns></returns>
+    private Task LoadInitialState()
     {
         try
         {
-            var status = await _model.LoadConfigAsync();
+            var initialstate = _config.GetSection("InitialState");
+            if (initialstate.Exists())
+            {
+                int numkeys = 0;
+                var root = initialstate.GetSection("Root");
+                if (root.Exists())
+                {
+                    var dictionary = root.GetChildren().ToDictionary(x => x.Key, x => x.Value);
+                    _model.SetInitialState(dictionary);
+                    numkeys += dictionary.Keys.Count;
+                }
 
-            _logger.LogInformation(LogEvents.ConfigOK,"Config: OK {status}",status);
+                _logger.LogInformation(LogEvents.ConfigOK,"Initial State: OK Applied {numkeys} keys",numkeys);
+            }
+            else
+            {
+                _logger.LogWarning(LogEvents.ConfigNoExists,"Initial State: Not specified");
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(LogEvents.ConfigError,"Config: Error {message}", ex.Message);
+            _logger.LogCritical(LogEvents.ConfigError,"Initial State: Error {message}", ex.Message);
             throw;
         }
+
+        return Task.CompletedTask;
     }
 
     /// <summary>

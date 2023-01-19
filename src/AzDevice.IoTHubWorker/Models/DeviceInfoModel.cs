@@ -84,5 +84,11 @@ public class DeviceInformationModel: IComponentModel
     {
         throw new NotImplementedException();
     }
+    
+    void IComponentModel.SetInitialState(IDictionary<string, string> values)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion    
 }

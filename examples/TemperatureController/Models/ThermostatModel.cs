@@ -12,10 +12,10 @@ public class ThermostatModel : IComponentModel
     public string ComponentID => "c";
 
     [JsonPropertyName("maxTempSinceLastReboot")]
-    public double MaxTemp { get; set; } = 1234.5;
+    public double MaxTemp { get; set; } = double.MinValue;
 
     [JsonPropertyName("targetTemperature")]
-    public double TargetTemp { get; set; } = 1234.5;
+    public double TargetTemp { get; set; }
 
     #endregion
 
@@ -82,6 +82,9 @@ public class ThermostatModel : IComponentModel
         // Obviously not a really good average! 🤣
         _minMaxReport.AverageTemp = (_minMaxReport.MinTemp + _minMaxReport.MaxTemp + reading) / 3;
 
+        // Update maxtemp property
+        MaxTemp = Math.Max(MaxTemp, reading);
+
         // Return the reading as telemetry
         return new Dictionary<string, object>()
         {
@@ -101,5 +104,11 @@ public class ThermostatModel : IComponentModel
     {
         return this as ThermostatModel;
     }    
+
+    void IComponentModel.SetInitialState(IDictionary<string, string> values)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 }

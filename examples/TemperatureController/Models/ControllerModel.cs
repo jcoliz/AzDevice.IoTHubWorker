@@ -8,7 +8,7 @@ public class ControllerModel : IRootModel
     #region Properties
 
     [JsonPropertyName("serialNumber")]
-    public string? SerialNumber { get; } = "1234567890";
+    public string? SerialNumber { get; private set; } = "Unassigned";
 
     #endregion
 
@@ -105,5 +105,12 @@ public class ControllerModel : IRootModel
     {
         return this as ControllerModel;
     }
+
+    void IComponentModel.SetInitialState(IDictionary<string, string> values)
+    {
+        if (values.ContainsKey("serialNumber"))
+            SerialNumber = values["serialNumber"];
+    }
+
     #endregion
 }

@@ -15,4 +15,6 @@ public interface IComponentModel
     IDictionary<string,object> GetTelemetry();
 
     Task<object> DoCommandAsync(string name, string jsonparams);
+
+    void SetInitialState(IDictionary<string, string> values);
 }

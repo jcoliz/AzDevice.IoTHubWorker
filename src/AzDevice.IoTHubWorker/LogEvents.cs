@@ -21,6 +21,7 @@ public class LogEvents
 
     // 2. Config
     public const int ConfigLoaded       = 201;
+    public const int ConfigNoExists     = 207;
     public const int ConfigOK           = 200;
     public const int ConfigError        = 280;
 
