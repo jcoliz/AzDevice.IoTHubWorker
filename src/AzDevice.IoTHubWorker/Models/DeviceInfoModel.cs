@@ -65,7 +65,7 @@ public class DeviceInformationModel: IComponentModel
 
     bool IComponentModel.HasTelemetry => false;
 
-    Task<object> IComponentModel.DoCommandAsync(string name, byte[] data)
+    Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
         throw new NotImplementedException();
     }

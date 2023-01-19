@@ -24,15 +24,15 @@ public class ThermostatModel : IComponentModel
 
     bool IComponentModel.HasTelemetry => true;
 
-    Task<object> IComponentModel.DoCommandAsync(string name, byte[] data)
+    Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
         if (name != "getMaxMinReport")
             throw new NotImplementedException();
 
-        var json = Encoding.UTF8.GetString(data);
-        DateTimeOffset since = DateTimeOffset.Now - TimeSpan.FromHours(1);
-        if (json.Length > 0)
-            since = JsonSerializer.Deserialize<DateTimeOffset>(json);
+        DateTimeOffset since =
+            (jsonparams.Length > 0) ?
+            JsonSerializer.Deserialize<DateTimeOffset>(jsonparams) :
+            DateTimeOffset.Now - TimeSpan.FromHours(1);
 
         var result = new MinMaxReportModel() { MaxTemp = 100.0, MinTemp = 200.0, StartTime = since, EndTime = DateTimeOffset.Now };
         return Task.FromResult<object>(result);

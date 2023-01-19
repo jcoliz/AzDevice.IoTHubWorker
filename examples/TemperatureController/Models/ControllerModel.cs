@@ -47,15 +47,12 @@ public class ControllerModel : IRootModel
 
     bool IComponentModel.HasTelemetry => false;
 
-    Task<object> IComponentModel.DoCommandAsync(string name, byte[] data)
+    Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
         if (name != "reboot")
             throw new NotImplementedException();
 
-        var json = Encoding.UTF8.GetString(data);
-        var delay = 0;
-        if (json.Length > 0)
-            delay = JsonSerializer.Deserialize<int>(json);
+        var delay = (jsonparams.Length > 0) ? JsonSerializer.Deserialize<int>(jsonparams) : 0;
 
         // TODO: Do something with this command
 
