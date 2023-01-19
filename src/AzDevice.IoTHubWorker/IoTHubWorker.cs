@@ -90,7 +90,7 @@ public sealed class IoTHubWorker : BackgroundService
 
 #region Startup
     /// <summary>
-    /// Loads initial state of components out of config
+    /// Loads initial state of components out of config "InitialState" section
     /// </summary>
     /// <returns></returns>
     private Task LoadInitialState()
@@ -148,6 +148,11 @@ public sealed class IoTHubWorker : BackgroundService
     /// <exception cref="ApplicationException">Thrown if provisioning fails (critical error)</exception>
     private async Task ProvisionDevice()
     {
+        string GetConfig(string key)
+        {
+            return _config[key] ?? throw new ApplicationException($"Failed. Please supply {key} in configuration");
+        }
+
         try
         {
             var source = GetConfig("Provisioning:source");
@@ -195,11 +200,6 @@ public sealed class IoTHubWorker : BackgroundService
             _logger.LogCritical(LogEvents.ProvisionError,"Provisioning: Error {message}", ex.Message);
             throw;
         }
-    }
-
-    private string GetConfig(string key)
-    {
-        return _config[key] ?? throw new ApplicationException($"Failed. Please supply {key} in configuration");
     }
 
     /// <summary>
