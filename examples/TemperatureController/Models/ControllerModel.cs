@@ -12,6 +12,21 @@ public class ControllerModel : IRootModel
 
     #endregion
 
+    #region Telemetry
+
+    private double WorkingSetKiB
+    {
+        get
+        {
+            var ws = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64;
+
+            // Convert to Kibibits
+            return (double)ws / (1024.0/8.0);
+        }
+    }
+
+    #endregion
+
     #region Commands
 
     protected Task<object> Reboot(string jsonparams)
@@ -59,7 +74,7 @@ public class ControllerModel : IRootModel
     [JsonIgnore]
     public string dtmi => "dtmi:com:example:TemperatureController;2";
 
-    bool IComponentModel.HasTelemetry => false;
+    bool IComponentModel.HasTelemetry => true;
 
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
@@ -72,7 +87,11 @@ public class ControllerModel : IRootModel
 
     IDictionary<string, object> IComponentModel.GetTelemetry()
     {
-        throw new NotImplementedException();
+        // Return the reading as telemetry
+        return new Dictionary<string, object>()
+        {
+            { "workingSet", WorkingSetKiB }
+        };
     }
 
     Task<string> IRootModel.LoadConfigAsync() => Task.FromResult<string>("No config needed");
