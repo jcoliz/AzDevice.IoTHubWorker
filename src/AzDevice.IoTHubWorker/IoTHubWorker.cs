@@ -48,6 +48,10 @@ public sealed class IoTHubWorker : BackgroundService
 #endregion
 
 #region Execute
+    /// <summary>
+    /// Do the work of this worker
+    /// </summary>
+    /// <param name="stoppingToken">Cancellation to indicate it's time stop</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
@@ -98,6 +102,10 @@ public sealed class IoTHubWorker : BackgroundService
         }
     }
 
+    /// <summary>
+    /// Provision this device according to the config supplied in config.toml
+    /// </summary>
+    /// <exception cref="ApplicationException">Thrown if provisioning fails (critical error)</exception>
     private async Task ProvisionDevice()
     {
         try
@@ -148,6 +156,10 @@ public sealed class IoTHubWorker : BackgroundService
         }
     }
 
+    /// <summary>
+    /// Open a connection to IoT Hub
+    /// </summary>
+    /// <exception cref="ApplicationException">Thrown if connection fails (critical error)</exception>
     private async Task OpenConnection()
     {
         try
@@ -184,12 +196,18 @@ public sealed class IoTHubWorker : BackgroundService
         catch (Exception ex)
         {
             _logger.LogCritical(LogEvents.ConnectError,"Connection: Error {message}", ex.Message);
-            throw;
+            throw new ApplicationException("Connection to IoT Hub failed", ex);
         }
     }
     #endregion
 
     #region Commands
+    /// <summary>
+    /// Receive a command from IoT Hub
+    /// </summary>
+    /// <param name="methodRequest">Details of the command (method) request</param>
+    /// <param name="userContext">Additional context (unused)</param>
+    /// <returns>Command-specific result payload</returns>
     private async Task<MethodResponse> OnCommandReceived(MethodRequest methodRequest, object userContext)
     {
         var command = methodRequest.Name;
@@ -240,6 +258,9 @@ public sealed class IoTHubWorker : BackgroundService
     #endregion
 
     #region Telemetry
+    /// <summary>
+    /// Send latest telemetry from root and all components
+    /// </summary>
     private async Task SendTelemetry()
     {
         int numsent = 0;
@@ -333,6 +354,14 @@ public sealed class IoTHubWorker : BackgroundService
 #endregion
 
 #region Properties
+    /// <summary>
+    /// Receive an update from IoT Hub that some property/ies have changed.
+    /// </summary>
+    /// <remarks>
+    /// Will send an update(s) to acknowledge each change.
+    /// </remarks>
+    /// <param name="desiredProperties">Details of the property change</param>
+    /// <param name="userContext">Additional context (unused)</param>
     private async Task OnDesiredPropertiesUpdate(TwinCollection desiredProperties, object userContext)
     {
         try
@@ -433,7 +462,9 @@ public sealed class IoTHubWorker : BackgroundService
         _logger.LogDebug(LogEvents.PropertyResponse, "Property: Responded to server with {response}",json);
     }
 
-    // Single update of all reported properties at once
+    /// <summary>
+    ///  Single update of all reported properties at once
+    /// </summary>
     private async Task UpdateReportedProperties()
     {
         var update = _model.Components.ToDictionary(x => x.Key, x => x.Value.GetProperties());
