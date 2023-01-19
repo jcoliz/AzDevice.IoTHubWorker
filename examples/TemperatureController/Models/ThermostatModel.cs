@@ -1,12 +1,19 @@
-using System.Text.Json.Serialization;
 using AzDevice.Models;
+using Newtonsoft.Json.Linq;
+using System.Text.Json.Serialization;
 
 public class ThermostatModel : IComponentModel
 {
     #region Properties
 
+    [JsonPropertyName("__t")]
+    public string ComponentID => "c";
+
     [JsonPropertyName("maxTempSinceLastReboot")]
-    public double MaxTemp { get; } = 1234.5;
+    public double MaxTemp { get; set; } = 1234.5;
+
+    [JsonPropertyName("targetTemperature")]
+    public double TargetTemp { get; set; } = 1234.5;
 
     #endregion
 
@@ -31,7 +38,12 @@ public class ThermostatModel : IComponentModel
 
     object IComponentModel.SetProperty(string key, object value)
     {
-        throw new NotImplementedException();
+        if (key != "targetTemperature")
+            throw new NotImplementedException();
+
+        double desired = (double)(JValue)value;
+        TargetTemp = desired;
+        return TargetTemp;
     }
 
     object IComponentModel.GetProperties()

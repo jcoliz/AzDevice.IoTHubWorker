@@ -1,7 +1,7 @@
+using AzDevice.Models;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzDevice.Models;
 
 public class ControllerModel : IRootModel
 {
@@ -31,8 +31,12 @@ public class ControllerModel : IRootModel
         },
         {
             "thermostat1",
-            new ThermostatModel()
-        }
+            new ThermostatModel() { MaxTemp = 1000.0 }
+        },
+        {
+            "thermostat2",
+            new ThermostatModel() { MaxTemp = 2000.0 }
+        },
     };
 
     #endregion
