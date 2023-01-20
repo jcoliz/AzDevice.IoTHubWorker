@@ -10,8 +10,8 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .ConfigureHostConfiguration(config =>
     {
-        config.AddTomlFile("config.toml");
-        config.AddJsonFile("version.json");
+        config.AddTomlFile("config.toml", optional: true, reloadOnChange: true);
+        config.AddJsonFile("version.json", optional: true, reloadOnChange: true);
     })
     .Build();
 
