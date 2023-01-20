@@ -13,13 +13,15 @@ public class MonitorModel : IRootModel
     // This is not included as a standard schema, see:
     // https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#geospatial-schemas
     //
+    // Azure IoT Explorer does not have UI support for "geopoint". So, we'll wing it!
+    //
     // The spec does allog for "point", however, 
     // "NOTE: Because GeoJSON is array-based (coordinates are stored in an 
     // array) and DTDL v2 does not support arrays in Properties, geospatial 
     // types cannot be used in Property schemas, but can be used in Telemetry 
     // and Commands schemas."
     [JsonPropertyName("Location")]
-    public string? Location { get; private set; } = "Unassigned";
+    public GeoPointModel? Location { get; private set; }
 
     [JsonPropertyName("City")]
     public string? City { get; private set; } = "City";
@@ -138,7 +140,7 @@ public class MonitorModel : IRootModel
             SoftwareVersion = values["Version"];
 
         if (values.ContainsKey("Location"))
-            Location = values["Location"];
+            Location = JsonSerializer.Deserialize<GeoPointModel>(values["Location"])!;
 
         if (values.ContainsKey("City"))
             City = values["City"];
