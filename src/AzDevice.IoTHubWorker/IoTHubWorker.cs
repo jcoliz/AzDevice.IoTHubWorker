@@ -63,7 +63,6 @@ public sealed class IoTHubWorker : BackgroundService
             await LoadInitialState();
 
             _logger.LogInformation(LogEvents.ExecuteDeviceInfo,"Device: {device}", _model);
-            _logger.LogInformation(LogEvents.ExecuteDeviceModel,"Model: {model}", _model.dtmi);
 
             await ProvisionDevice();
             await OpenConnection();
@@ -126,9 +125,10 @@ public sealed class IoTHubWorker : BackgroundService
                 _logger.LogWarning(LogEvents.ConfigNoExists,"Initial State: Not specified");
             }
 
-            // Special handling of software build version
-            var version = _config["Version"];
-            _model.SetInitialState(new Dictionary<string,string>() {{ "Version", version }});
+            // Where to store the software build version is solution-dependent.
+            // Thus, we will pass it in as a root-level "Version" initial state, and let the
+            // solution decide what to do with it.
+            _model.SetInitialState(new Dictionary<string,string>() {{ "Version", _config["Version"] }});
         }
         catch (Exception ex)
         {

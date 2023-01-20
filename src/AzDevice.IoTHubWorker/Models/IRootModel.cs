@@ -6,9 +6,5 @@ public interface IRootModel: IComponentModel
 {
     public TimeSpan TelemetryPeriod { get; }
 
-    public DeviceInformationModel DeviceInfo { get; }
-
     IDictionary<string,IComponentModel> Components { get; }
-
-    Task<string> LoadConfigAsync();
 }

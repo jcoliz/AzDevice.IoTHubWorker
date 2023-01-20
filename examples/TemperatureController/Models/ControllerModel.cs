@@ -39,13 +39,19 @@ public class ControllerModel : IRootModel
 
     #endregion
 
+    #region Log Identity
+    public override string ToString()
+    {
+        return $"{DeviceInformation.Manufacturer} {DeviceInformation.DeviceModel} S/N:{SerialNumber} ver:{DeviceInformation.SoftwareVersion} {dtmi}";
+    }
+    #endregion
+
     #region IRootModel
 
     TimeSpan IRootModel.TelemetryPeriod => TimeSpan.FromSeconds(10);
 
-    DeviceInformationModel IRootModel.DeviceInfo => ((IRootModel)this).Components["deviceInformation"] as DeviceInformationModel ?? throw new NotImplementedException();
-
-    IDictionary<string, IComponentModel> IRootModel.Components { get; } = new Dictionary<string, IComponentModel>()
+    [JsonIgnore]
+    public IDictionary<string, IComponentModel> Components { get; } = new Dictionary<string, IComponentModel>()
     {
         { 
             "deviceInformation", 
@@ -60,6 +66,10 @@ public class ControllerModel : IRootModel
             new ThermostatModel()
         },
     };
+    #endregion
+
+    #region Internals
+    private DeviceInformationModel DeviceInformation => (Components["deviceInformation"] as DeviceInformationModel)!;
 
     #endregion
 
@@ -88,8 +98,6 @@ public class ControllerModel : IRootModel
         };
     }
 
-    Task<string> IRootModel.LoadConfigAsync() => Task.FromResult<string>("No config needed");
-
     object IComponentModel.SetProperty(string key, string jsonvalue)
     {
         throw new NotImplementedException();
@@ -102,9 +110,12 @@ public class ControllerModel : IRootModel
 
     void IComponentModel.SetInitialState(IDictionary<string, string> values)
     {
+        if (values.ContainsKey("Version"))
+            DeviceInformation.SoftwareVersion = values["Version"];
+
         if (values.ContainsKey("serialNumber"))
             SerialNumber = values["serialNumber"];
     }
 
-    #endregion
+    #endregion    
 }

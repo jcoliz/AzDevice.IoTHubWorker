@@ -83,19 +83,16 @@ public class MonitorModel : IRootModel
     #region Commands
     #endregion
 
-    #region Identifier for logs
+    #region Log Identity
     public override string ToString()
     {
-        return $"Climate Monitor v{SoftwareVersion}";
+        return $"Climate Monitor {SoftwareVersion} {dtmi}";
     }
     #endregion
 
     #region IRootModel
 
     TimeSpan IRootModel.TelemetryPeriod => TimeSpan.FromSeconds(10);
-
-    // TODO: Get rid of this
-    DeviceInformationModel IRootModel.DeviceInfo { get; } = new DeviceInformationModel();
 
     IDictionary<string, IComponentModel> IRootModel.Components { get; } = new Dictionary<string, IComponentModel>();
 
@@ -121,9 +118,6 @@ public class MonitorModel : IRootModel
             { "memoryUsage", MemoryUsageKiB }
         };
     }
-
-    // TODO: Get rid of this
-    Task<string> IRootModel.LoadConfigAsync() => Task.FromResult<string>("No config needed");
 
     object IComponentModel.SetProperty(string key, string jsonvalue)
     {
