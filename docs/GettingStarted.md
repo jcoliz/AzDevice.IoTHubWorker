@@ -152,7 +152,11 @@ If everything was configured correctly, you'll see your device name connected to
 The Azure IoT Explorer makes it easy to find our devices and communicate with them. Because we're using
 an IoT Plug-and-Play model, the Explorer automatically creates UI to interact with our device in the
 way we've described in the DTMI model. It knows what telemetry to expect, which commmands we can send,
-which properties we can view, and which properties we can change.
+which properties we can view, and which properties we can change. 
+
+This all makes it an incredibly powerful tool for deployment. We can first create our interface based
+on the problem domain. Then develop to fulfill that interface while using IoT Explorer as a front-end.
+Finally, we can integrate the back-end services once we have a device we know is working correctly.
 
 To get started:
 
