@@ -3,6 +3,7 @@ Description=Temperature Controller
 
 [Service]
 Type=notify
+WorkingDirectory=/opt/TemperatureController
 ExecStart=/opt/TemperatureController/TemperatureController
 
 [Install]

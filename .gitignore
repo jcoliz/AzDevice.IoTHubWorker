@@ -9,7 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-config.toml
+config.toml*
 .env.ps1
 version.json
 
