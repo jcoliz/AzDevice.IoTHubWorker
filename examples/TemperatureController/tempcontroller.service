@@ -1,0 +1,9 @@
+[Unit]
+Description=Temperature Controller
+
+[Service]
+Type=notify
+ExecStart=/opt/TemperatureController/TemperatureController
+
+[Install]
+WantedBy=multi-user.target

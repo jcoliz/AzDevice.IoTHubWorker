@@ -2,6 +2,7 @@ using AzDevice;
 using AzDevice.Models;
 
 IHost host = Host.CreateDefaultBuilder(args)
+    .UseSystemd() 
     .ConfigureServices(services =>
     {
         services.AddHostedService<IoTHubWorker>();
