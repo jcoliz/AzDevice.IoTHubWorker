@@ -10,7 +10,11 @@ Check out [Worker Services in .NET](https://learn.microsoft.com/en-us/dotnet/cor
 
 ## Configure Host Service for SystemD
 
-You'll need to add `UseSystemd' to your host builder. For example, here's mine:
+You'll need to add `UseSystemd' to your host builder. This service allows the app and systemd to communicate seamlessly.
+The app will properly notify systemd when it's running or stopping, as well as map the log levels in a way systemd
+can understand them. All good stuff!
+
+For example, here's mine:
 
 ```c#
 IHost host = Host.CreateDefaultBuilder(args)
