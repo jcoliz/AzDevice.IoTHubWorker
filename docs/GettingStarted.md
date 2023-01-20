@@ -29,7 +29,7 @@ This uses the Azure CLI to create a new resource group:
 az group create --name $env:RESOURCEGROUP --location "West US 2"
 ```
 
-### Deploy IoT Hub & DPS
+### Deploy IoT Hub & DPS Services
 
 1. Run `Deploy-Services.ps1`
 
@@ -73,7 +73,7 @@ deployment.
 The remaining scripts rely on these variables being set, as well as contributing
 new variables.
 
-### Create Enrollment Group
+### Create an Enrollment Group
 
 1. Run `Create-EnrollmentGroup.ps1` 
 
@@ -91,7 +91,7 @@ az iot dps enrollment-group create -g $env:RESOURCEGROUP --dps-name $env:DPSNAME
 
 Be sure to add `$env:PK` and `$env:SK` to your environment variables file.
 
-## Enroll Device
+## Enroll a Device
 
 At this point, our services are all set up and ready to go. What's left is to enroll the specific device
 we're using (our development PC in this case) into the service.
@@ -117,7 +117,7 @@ by replacing the needed tokens with correct values based on your solution.
 ## Build/Run Device Software
 
 To make things easy, you can follow along with the TemperatureController example device software.
-This implements the example TemeratureController device model from the DTMI repo.
+This implements the [dtmi:com:example:TemperatureController;2](https://github.com/Azure/iot-plugandplay-models/blob/main/dtmi/com/example/temperaturecontroller-2.json) interface from the official [Azure/iot-plugandplay-models repository](https://github.com/Azure/iot-plugandplay-models).
 Along the way, you can see how IoT Plug-and-Play is a powerful tool for IoT application
 development.
 
@@ -175,9 +175,9 @@ To get started:
 
 ## What's next
 
-* Try different device models
+* Explore the Azure IoT Device Worker using different device models
 * Create your OWN device model
-* Deploy to your Linux-based IoT device
+* Deploy to a Linux-based IoT device
 * Use Azure Pipelines to create a Continous Integration workflow deploying deb packages to a private deb repository
 * Deploy to Raspberry Pi
 * Send data from real sensors

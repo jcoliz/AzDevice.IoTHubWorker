@@ -113,6 +113,9 @@ steps:
 
 This file can be downloaded from the 'artifacts' from any particular build.
 
+![See Artifacts](./images/build-see-artifact.png)
+![Get Artifacts](./images/build-get-artifact.png)
+
 ## Copy ZIP file onto target machine
 
 Copy that file over to the machine where we'll be running...
