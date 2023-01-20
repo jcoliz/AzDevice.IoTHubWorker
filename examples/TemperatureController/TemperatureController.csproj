@@ -23,8 +23,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="version.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="config.toml" CopyToOutputDirectory="PreserveNewest" />
     <None Update="tempcontroller.service" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="pwsh --command &quot; &amp;&apos;$(ProjectDir)scripts\Update-Version.ps1&apos; &gt; &apos;$(ProjectDir)version.json&apos; &quot;" />
+  </Target>
 
 </Project>

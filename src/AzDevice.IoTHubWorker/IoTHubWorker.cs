@@ -121,6 +121,9 @@ public sealed class IoTHubWorker : BackgroundService
                     }
                 }
 
+                // Special handling of software build version
+                _model.DeviceInfo.SoftwareVersion = _config["Version"];;
+
                 _logger.LogInformation(LogEvents.ConfigOK,"Initial State: OK Applied {numkeys} keys",numkeys);
             }
             else

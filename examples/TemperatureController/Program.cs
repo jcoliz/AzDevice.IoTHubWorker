@@ -11,6 +11,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureHostConfiguration(config =>
     {
         config.AddTomlFile("config.toml");
+        config.AddJsonFile("version.json");
     })
     .Build();
 
