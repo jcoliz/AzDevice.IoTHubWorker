@@ -60,12 +60,10 @@ public sealed class IoTHubWorker : BackgroundService
         {
             _logger.LogInformation(LogEvents.ExecuteStartOK,"Started OK");
 
-            if (!string.IsNullOrEmpty(_model.dtmi))
-                _logger.LogInformation(LogEvents.ExecuteDeviceModel,"Model: {model}", _model.dtmi);
-
             await LoadInitialState();
-            var device = _model.DeviceInfo;
-            _logger.LogInformation(LogEvents.ExecuteDeviceInfo,"Device: {mfr} {model} {version}", device.Manufacturer, device.DeviceModel, device.SoftwareVersion);
+
+            _logger.LogInformation(LogEvents.ExecuteDeviceInfo,"Device: {device}", _model);
+            _logger.LogInformation(LogEvents.ExecuteDeviceModel,"Model: {model}", _model.dtmi);
 
             await ProvisionDevice();
             await OpenConnection();
@@ -121,15 +119,16 @@ public sealed class IoTHubWorker : BackgroundService
                     }
                 }
 
-                // Special handling of software build version
-                _model.DeviceInfo.SoftwareVersion = _config["Version"];;
-
                 _logger.LogInformation(LogEvents.ConfigOK,"Initial State: OK Applied {numkeys} keys",numkeys);
             }
             else
             {
                 _logger.LogWarning(LogEvents.ConfigNoExists,"Initial State: Not specified");
             }
+
+            // Special handling of software build version
+            var version = _config["Version"];
+            _model.SetInitialState(new Dictionary<string,string>() {{ "Version", version }});
         }
         catch (Exception ex)
         {
