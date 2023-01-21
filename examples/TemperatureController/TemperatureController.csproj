@@ -25,7 +25,6 @@
   <ItemGroup>
     <None Update="version.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="config.toml" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="tempcontroller.service" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
