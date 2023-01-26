@@ -31,6 +31,7 @@ public sealed class IoTHubWorker : BackgroundService
     private readonly IRootModel _model;
     private readonly ILogger<IoTHubWorker> _logger;
     private readonly IConfiguration _config;
+    private readonly IHostEnvironment _hostenv;
 
     #endregion
 
@@ -41,11 +42,12 @@ public sealed class IoTHubWorker : BackgroundService
 #endregion
 
 #region Constructor
-    public IoTHubWorker(ILogger<IoTHubWorker> logger, IRootModel model, IConfiguration config)
+    public IoTHubWorker(ILogger<IoTHubWorker> logger, IRootModel model, IConfiguration config, IHostEnvironment hostenv)
     {
         _logger = logger;
         _model = model;
         _config = config;
+        _hostenv = hostenv;
     }
 #endregion
 
@@ -158,6 +160,9 @@ public sealed class IoTHubWorker : BackgroundService
 
         try
         {
+            if (!_config.GetSection("Provisioning").Exists())
+                throw new ApplicationException($"Unable to find provisioning details in app configuration. Create a config.toml with provisioning details in the content root ({_hostenv.ContentRootPath}).");
+
             var source = GetConfig("Provisioning:source");
             var global_endpoint = GetConfig("Provisioning:global_endpoint");
             var id_scope = GetConfig("Provisioning:id_scope"); 
