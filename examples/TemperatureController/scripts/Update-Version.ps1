@@ -1,6 +1,6 @@
 if (Test-Path env:BUILD_BUILDID) 
 {
-    $Version = "ci-$env:BUILD_BUILDID"
+    $Version = "0.0.0-ci-$env:BUILD_BUILDID"
 }
 else 
 {    
