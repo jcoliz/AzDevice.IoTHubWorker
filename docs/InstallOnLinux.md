@@ -202,7 +202,9 @@ ExecStart=/opt/TemperatureController/TemperatureController
 WantedBy=multi-user.target
 ```
 
-This goes into `/etc/systemd/system`, and then reload the daemon:
+Note that the "WantedBy=" line will cause the service to be started automatically when the device boots.
+
+Thie systemd unit file goes into `/etc/systemd/system`, and then reload the daemon:
 
 ```
 james@brewbox:~$ sudo cp /opt/TemperatureController/tempcontroller.service /etc/systemd/system
@@ -276,6 +278,23 @@ james@brewbox:~$ sudo systemctl status tempcontroller
      Active: inactive (dead) since Thu 2023-01-19 20:13:10 PST; 27s ago
     Process: 17626 ExecStart=/opt/TemperatureController/TemperatureController (code=exited, status=0/SUCCESS)
    Main PID: 17626 (code=exited, status=0/SUCCESS)
+```
+
+## Disable the service
+
+When your device next boots, it will automatically start the service again. If you don't want this, you can 
+now disable the service.
+
+```
+james@brewbox:~$ sudo systemctl disable tempcontroller
+Removed /etc/systemd/system/multi-user.target.wants/tempcontroller.service.
+```
+
+Next time you want to work with it again, simply enable it again:
+
+```
+james@brewbox:~$ sudo systemctl enable tempcontroller
+Created symlink /etc/systemd/system/multi-user.target.wants/tempcontroller.service → /etc/systemd/system/tempcontroller.service.
 ```
 
 ## Next up: Build into a DEB package!
