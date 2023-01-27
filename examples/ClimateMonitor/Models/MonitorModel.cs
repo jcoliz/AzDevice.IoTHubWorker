@@ -61,47 +61,66 @@ public class MonitorModel : IRootModel
 
     // NOTE: The Climate Monitor repeats the telemetry readings also as read-only properties.
     // In this implementation, I'm only implementing them as telemetry
-
-    private int Temperature => 1;
-
-    private int Pressure => 2;
-
-    private int Humidity => 3;
-
-    private double Lattitude => 1.0;
-
-    private double Longitude => 2.0;
-
-    private double AirQuality => 3.0;
-
-    private double CarbonMonoxide => 4.0;
-
-    private double NitrogenMonoxide => 4.5;
-
-    private double NitrogenDioxide => 5.0;
-
-    private double Ozone => 6.0;
-
-    private double SulpherDioxide => 7.0;
-
-    private double Ammonia => 8.0;
-
-    private double ParticulateMatter10 => 10.0;
-
-    private double ParticulateMatter25 => 9.0;
-
-    private double WindSpeed => 11.0;
-
-    private int WindDirection => 12;
-
-    private double MemoryUsageKiB
+    public class Telemetry
     {
-        get
-        {
-            var ws = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64;
+        [JsonPropertyName("temperature")]
+        public int Temperature => 1;
 
-            // Convert to Kibibits
-            return (double)ws / (1024.0/8.0);
+        [JsonPropertyName("pressure")]
+        public int Pressure => 2;
+
+        [JsonPropertyName("humidity")]
+        public int Humidity => 3;
+
+        [JsonPropertyName("latitude")]
+        public double Latitude => 1.0;
+
+        [JsonPropertyName("longitude")]
+        public double Longitude => 2.0;
+
+        [JsonPropertyName("aqi")]
+        public double AirQuality => 3.0;
+
+        [JsonPropertyName("co")]
+        public double CarbonMonoxide => 4.0;
+
+        [JsonPropertyName("no")]
+        public double NitrogenMonoxide => 4.5;
+
+        [JsonPropertyName("no2")]
+        public double NitrogenDioxide => 5.0;
+
+        [JsonPropertyName("o3")]
+        public double Ozone => 6.0;
+
+        [JsonPropertyName("so2")]
+        public double SulpherDioxide => 7.0;
+
+        [JsonPropertyName("nh3")]
+        public double Ammonia => 8.0;
+
+        [JsonPropertyName("pm10")]
+        public double ParticulateMatter10 => 10.0;
+
+        [JsonPropertyName("pm2_5")]
+        public double ParticulateMatter25 => 9.0;
+
+        [JsonPropertyName("windspeed")]
+        public double WindSpeed => 11.0;
+
+        [JsonPropertyName("winddirection")]
+        public int WindDirection => 12;
+
+        [JsonPropertyName("memoryUsage")]
+        public double MemoryUsageKiB
+        {
+            get
+            {
+                var ws = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64;
+
+                // Convert to Kibibits
+                return (double)ws / (1024.0/8.0);
+            }
         }
     }
 
@@ -139,22 +158,15 @@ public class MonitorModel : IRootModel
 
     IDictionary<string, object> IComponentModel.GetTelemetry()
     {
-        // Returning just a subset. You get the idea!
-        return new Dictionary<string, object>()
-        {
-            { "memoryUsage", MemoryUsageKiB },
-            { "temperature", Temperature },
-            { "humidity", Humidity },
-            { "aqi", AirQuality },
-            { "co", CarbonMonoxide },
-            { "no", NitrogenMonoxide },
-            { "pm10", ParticulateMatter10 },
-            { "pm2_5", ParticulateMatter25 }
-        };
+        // Take a reading
+        var reading = new Telemetry();
 
-        // TODO: It may be better here to make a separate object
-        // to model the telemetry, and then return that which the
-        // worker will serialize to JSON and send. 
+        // Make a dictionary out of it        
+        var json = JsonSerializer.Serialize(reading);
+        var result = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+        // TODO: This could be moved to the worker
+
+        return result!;
     }
 
     object IComponentModel.SetProperty(string key, string jsonvalue)
