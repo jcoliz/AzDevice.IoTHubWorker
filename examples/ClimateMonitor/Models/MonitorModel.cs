@@ -59,6 +59,9 @@ public class MonitorModel : IRootModel
 
     #region Telemetry
 
+    // NOTE: The Climate Monitor repeats the telemetry readings also as read-only properties.
+    // In this implementation, I'm only implementing them as telemetry
+
     private int Temperature => 1;
 
     private int Pressure => 2;
@@ -73,6 +76,8 @@ public class MonitorModel : IRootModel
 
     private double CarbonMonoxide => 4.0;
 
+    private double NitrogenMonoxide => 4.5;
+
     private double NitrogenDioxide => 5.0;
 
     private double Ozone => 6.0;
@@ -81,9 +86,9 @@ public class MonitorModel : IRootModel
 
     private double Ammonia => 8.0;
 
-    private double ParticulateMatter25 => 9.0;
-
     private double ParticulateMatter10 => 10.0;
+
+    private double ParticulateMatter25 => 9.0;
 
     private double WindSpeed => 11.0;
 
@@ -134,11 +139,22 @@ public class MonitorModel : IRootModel
 
     IDictionary<string, object> IComponentModel.GetTelemetry()
     {
-        // Return the reading as telemetry
+        // Returning just a subset. You get the idea!
         return new Dictionary<string, object>()
         {
-            { "memoryUsage", MemoryUsageKiB }
+            { "memoryUsage", MemoryUsageKiB },
+            { "temperature", Temperature },
+            { "humidity", Humidity },
+            { "aqi", AirQuality },
+            { "co", CarbonMonoxide },
+            { "no", NitrogenMonoxide },
+            { "pm10", ParticulateMatter10 },
+            { "pm2_5", ParticulateMatter25 }
         };
+
+        // TODO: It may be better here to make a separate object
+        // to model the telemetry, and then return that which the
+        // worker will serialize to JSON and send. 
     }
 
     object IComponentModel.SetProperty(string key, string jsonvalue)
