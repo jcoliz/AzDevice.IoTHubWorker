@@ -93,7 +93,7 @@ public class ThermostatModel : IComponentModel
     object IComponentModel.SetProperty(string key, string jsonvalue)
     {
         if (key != "targetTemperature")
-            throw new NotImplementedException();
+            throw new NotImplementedException($"Property {key} is not implemented on {dtmi}");
 
         return TargetTemp = Convert.ToDouble(jsonvalue);
     }

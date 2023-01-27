@@ -1,6 +1,7 @@
 using AzDevice.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml;
 
 public class ControllerModel : IRootModel
 {
@@ -8,6 +9,23 @@ public class ControllerModel : IRootModel
 
     [JsonPropertyName("serialNumber")]
     public string? SerialNumber { get; private set; } = "Unassigned";
+
+    // Note that telemetry period is not strictly part of the DTMI. Still,
+    // it's nice to be able to set it in config, and send down changes to it
+
+    [JsonPropertyName("telemetryPeriod")]
+    public string TelemetryPeriod 
+    { 
+        get
+        {
+            return XmlConvert.ToString(_TelemetryPeriod);
+        } 
+        private set
+        {
+            _TelemetryPeriod = XmlConvert.ToTimeSpan(value);
+        }
+    }
+    private TimeSpan _TelemetryPeriod = TimeSpan.Zero;
 
     #endregion
 
@@ -48,7 +66,7 @@ public class ControllerModel : IRootModel
 
     #region IRootModel
 
-    TimeSpan IRootModel.TelemetryPeriod => TimeSpan.FromSeconds(10);
+    TimeSpan IRootModel.TelemetryPeriod => _TelemetryPeriod;
 
     [JsonIgnore]
     public IDictionary<string, IComponentModel> Components { get; } = new Dictionary<string, IComponentModel>()
@@ -100,7 +118,10 @@ public class ControllerModel : IRootModel
 
     object IComponentModel.SetProperty(string key, string jsonvalue)
     {
-        throw new NotImplementedException();
+        if (key != "telemetryPeriod")
+            throw new NotImplementedException($"Property {key} is not implemented on {dtmi}");
+
+        return TelemetryPeriod = System.Text.Json.JsonSerializer.Deserialize<string>(jsonvalue)!;
     }
 
     object IComponentModel.GetProperties()
@@ -115,6 +136,9 @@ public class ControllerModel : IRootModel
 
         if (values.ContainsKey("serialNumber"))
             SerialNumber = values["serialNumber"];
+
+        if (values.ContainsKey("telemetryPeriod"))
+            TelemetryPeriod = values["telemetryPeriod"];
     }
 
     #endregion    
