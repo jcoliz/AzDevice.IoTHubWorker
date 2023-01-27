@@ -39,6 +39,8 @@ public sealed class IoTHubWorker : BackgroundService
     private DeviceClient? iotClient;
     private SecurityProviderSymmetricKey? security;
     private DeviceRegistrationResult? result;
+    private DateTimeOffset NextPropertyUpdateTime = DateTimeOffset.MinValue;
+    private TimeSpan PropertyUpdatePeriod = TimeSpan.FromMinutes(1);
 #endregion
 
 #region Constructor
@@ -71,6 +73,7 @@ public sealed class IoTHubWorker : BackgroundService
             while (!stoppingToken.IsCancellationRequested)
             {
                 await SendTelemetry();
+                await UpdateReportedProperties();
                 await Task.Delay(_model.TelemetryPeriod, stoppingToken);
             }
 
@@ -233,9 +236,6 @@ public sealed class IoTHubWorker : BackgroundService
 
             iotClient = DeviceClient.Create(result.AssignedHub, auth, TransportType.Mqtt, options);
             _logger.LogInformation(LogEvents.ConnectOK,"Connection: OK. {info}", iotClient.ProductInfo);
-
-            // Update the current state of actual properties
-            await UpdateReportedProperties();
 
             // Read the current state of desired properties and set the local values as desired
             var twin = await iotClient.GetTwinAsync().ConfigureAwait(false);
@@ -522,6 +522,9 @@ public sealed class IoTHubWorker : BackgroundService
     /// </summary>
     private async Task UpdateReportedProperties()
     {
+        if (DateTimeOffset.Now < NextPropertyUpdateTime)
+            return;
+
         // Create dictionary of root properties
         var root = _model.GetProperties();
         var j1 = JsonSerializer.Serialize(root);
@@ -540,7 +543,14 @@ public sealed class IoTHubWorker : BackgroundService
         await iotClient!.UpdateReportedPropertiesAsync(resulttc);
 
         _logger.LogInformation(LogEvents.PropertyReportedOK,"Property: OK Reported {count} properties",update.Count);
-        _logger.LogDebug(LogEvents.PropertyReportedDetail,"Property: Reported details {detail}",json);
+        _logger.LogDebug(LogEvents.PropertyReportedDetail,"Property: Reported details {detail}. Next update after {delay}",json,PropertyUpdatePeriod);
+
+        // Manage back-off of property updates
+        NextPropertyUpdateTime = DateTimeOffset.Now + PropertyUpdatePeriod;
+        PropertyUpdatePeriod += PropertyUpdatePeriod;
+        TimeSpan oneday = TimeSpan.FromDays(1);
+        if (PropertyUpdatePeriod > oneday)
+            PropertyUpdatePeriod = oneday;
     }
     #endregion
 }
