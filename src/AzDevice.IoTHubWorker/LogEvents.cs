@@ -54,9 +54,10 @@ public class LogEvents
     public const int PropertyOK         = 2000;
     public const int PropertyRequest = 2001;
     public const int PropertyResponse = 2002;
-    public const int PropertySendActuals = 2003;
     public const int PropertyUpdateFailure = 2081;
     public const int PropertySingleFailure = 2081;
     public const int PropertyMultipleFailure = 2082;
+    public const int PropertyReportedOK  = 2100;
+    public const int PropertyReportedDetail = 2101;
     public const int PropertyComponentOK = 2300;
 }

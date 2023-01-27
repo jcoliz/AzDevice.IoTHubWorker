@@ -531,7 +531,7 @@ public sealed class IoTHubWorker : BackgroundService
         var d2 = _model.Components.ToDictionary(x => x.Key, x => x.Value.GetProperties());
 
         // Merge them
-        var d3 = new[] { d1, d2 };
+        var d3 = new[] { d1, d2 }; 
         var update = d3.SelectMany(x => x!).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         // Convert to json and send them
@@ -539,7 +539,8 @@ public sealed class IoTHubWorker : BackgroundService
         var resulttc = new TwinCollection(json);
         await iotClient!.UpdateReportedPropertiesAsync(resulttc);
 
-        _logger.LogDebug(LogEvents.PropertySendActuals,"Property: Updated reported properties as {update}",json);
+        _logger.LogInformation(LogEvents.PropertyReportedOK,"Property: OK Reported {count} properties",update.Count);
+        _logger.LogDebug(LogEvents.PropertyReportedDetail,"Property: Reported details {detail}",json);
     }
     #endregion
 }
