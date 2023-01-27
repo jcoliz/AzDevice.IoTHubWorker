@@ -322,7 +322,7 @@ public sealed class IoTHubWorker : BackgroundService
 
         // Send telementry from root
 
-        if (_model.HasTelemetry)
+        if (_model.HasTelemetry && _model.TelemetryPeriod > TimeSpan.Zero)
         {
             // Obtain readings from this component
             var readings = _model.GetTelemetry();
