@@ -1,6 +1,7 @@
 using AzDevice.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml;
 
 public class MonitorModel : IRootModel
 {
@@ -37,6 +38,22 @@ public class MonitorModel : IRootModel
 
     [JsonPropertyName("LedBrightness")]
     public int LedBrightness { get; set; }
+
+    // Note that telemetry period is not strictly part of the DTMI. Still,
+    // it's nice to be able to set it in config, and send down changes to it
+    [JsonPropertyName("telemetryPeriod")]
+    public string TelemetryPeriod 
+    { 
+        get
+        {
+            return XmlConvert.ToString(_TelemetryPeriod);
+        } 
+        private set
+        {
+            _TelemetryPeriod = XmlConvert.ToTimeSpan(value);
+        }
+    }
+    private TimeSpan _TelemetryPeriod = TimeSpan.Zero;
 
     #endregion
 
@@ -97,7 +114,7 @@ public class MonitorModel : IRootModel
 
     #region IRootModel
 
-    TimeSpan IRootModel.TelemetryPeriod => TimeSpan.FromSeconds(10);
+    TimeSpan IRootModel.TelemetryPeriod => _TelemetryPeriod;
 
     IDictionary<string, IComponentModel> IRootModel.Components { get; } = new Dictionary<string, IComponentModel>();
 
@@ -153,6 +170,9 @@ public class MonitorModel : IRootModel
 
         if (values.ContainsKey("LedBrightness"))
             LedBrightness = Convert.ToInt32(values["LedBrightness"]);
+
+        if (values.ContainsKey("telemetryPeriod"))
+            TelemetryPeriod = values["telemetryPeriod"];
     }
 
     #endregion
