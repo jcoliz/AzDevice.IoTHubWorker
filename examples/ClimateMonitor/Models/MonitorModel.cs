@@ -32,6 +32,9 @@ public class MonitorModel : IRootModel
     [JsonPropertyName("HeartbeatUTC")]
     public DateTimeOffset HeartbeatUTC => DateTimeOffset.UtcNow;
 
+    [JsonPropertyName("StartTimeUTC")]
+    public DateTimeOffset StartTimeUTC { get; } = DateTimeOffset.UtcNow;
+
     [JsonPropertyName("LedBrightness")]
     public int LedBrightness { get; set; }
 
