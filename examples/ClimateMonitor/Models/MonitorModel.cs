@@ -133,7 +133,7 @@ public class MonitorModel : IRootModel
     #region Log Identity
     public override string ToString()
     {
-        return $"Climate Monitor {SoftwareVersion} {dtmi}";
+        return $"Example Climate Monitor ver:{SoftwareVersion}";
     }
     #endregion
 
@@ -150,11 +150,6 @@ public class MonitorModel : IRootModel
 
     [JsonIgnore]
     public string dtmi => "dtmi:com:example:climatemonitor;1";
-
-    Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
-    {
-        throw new NotImplementedException($"Command {name} is not implemented on {dtmi}");
-    }
 
     object? IComponentModel.GetTelemetry()
     {
@@ -194,6 +189,11 @@ public class MonitorModel : IRootModel
 
         if (values.ContainsKey("telemetryPeriod"))
             TelemetryPeriod = values["telemetryPeriod"];
+    }
+
+    Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
+    {
+        throw new NotImplementedException($"Command {name} is not implemented on {dtmi}");
     }
 
     #endregion

@@ -1,8 +1,16 @@
+// Copyright (C) 2023 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
+
 using AzDevice.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
 
+/// <summary>
+/// Implementation for IoT Plug-and-play example temperature controller
+/// </summary>
+/// <remarks>
+/// "dtmi:com:example:TemperatureController;2";
+/// </remarks>
 public class ControllerModel : IRootModel
 {
     #region Properties
@@ -63,16 +71,26 @@ public class ControllerModel : IRootModel
     #endregion
 
     #region Log Identity
+    /// <summary>
+    /// How should this model appear in the logs?
+    /// </summary>
+    /// <returns>String to identify the current model</returns>
     public override string ToString()
     {
-        return $"{DeviceInformation.Manufacturer} {DeviceInformation.DeviceModel} S/N:{SerialNumber} ver:{DeviceInformation.SoftwareVersion} {dtmi}";
+        return $"{DeviceInformation.Manufacturer} {DeviceInformation.DeviceModel} S/N:{SerialNumber} ver:{DeviceInformation.SoftwareVersion}";
     }
     #endregion
 
     #region IRootModel
 
+    /// <summary>
+    /// How often to send telemetry, or zero to avoid sending any telemetry right now
+    /// </summary>
     TimeSpan IRootModel.TelemetryPeriod => _TelemetryPeriod;
 
+    /// <summary>
+    /// The components which are contained within this one
+    /// </summary>
     [JsonIgnore]
     public IDictionary<string, IComponentModel> Components { get; } = new Dictionary<string, IComponentModel>()
     {
@@ -98,24 +116,28 @@ public class ControllerModel : IRootModel
 
     #region IComponentModel
 
+    /// <summary>
+    /// Identifier for this model
+    /// </summary>
     [JsonIgnore]
     public string dtmi => "dtmi:com:example:TemperatureController;2";
 
-    Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
-    {
-        return name switch
-        {
-            "reboot" => Reboot(jsonparams),
-            _ => throw new NotImplementedException($"Command {name} is not implemented on {dtmi}")
-        };
-    }
-
+    /// <summary>
+    /// Get an object containing all current telemetry
+    /// </summary>
+    /// <returns>All telemetry we wish to send at this time, or null for don't send any</returns>
     object? IComponentModel.GetTelemetry()
     {
         // Take the reading, return it
         return new Telemetry();
     }
 
+    /// <summary>
+    /// Set a particular property to the given value
+    /// </summary>
+    /// <param name="key">Which property</param>
+    /// <param name="jsonvalue">Value to set (will be deserialized from JSON)</param>
+    /// <returns>The unserialized new value of the property</returns>
     object IComponentModel.SetProperty(string key, string jsonvalue)
     {
         if (key != "telemetryPeriod")
@@ -124,11 +146,19 @@ public class ControllerModel : IRootModel
         return TelemetryPeriod = System.Text.Json.JsonSerializer.Deserialize<string>(jsonvalue)!;
     }
 
+    /// <summary>
+    /// Get an object containing all properties known to this model
+    /// </summary>
+    /// <returns>All known properties, and their current state</returns>
     object IComponentModel.GetProperties()
     {
         return this as ControllerModel;
     }
 
+    /// <summary>
+    /// Set the application intitial state from the supplied configuration values
+    /// </summary>
+    /// <param name="values">Dictionary of all known configuration values which could apply to this component</param>
     void IComponentModel.SetInitialState(IDictionary<string, string> values)
     {
         if (values.ContainsKey("Version"))
@@ -139,6 +169,21 @@ public class ControllerModel : IRootModel
 
         if (values.ContainsKey("telemetryPeriod"))
             TelemetryPeriod = values["telemetryPeriod"];
+    }
+
+    /// <summary>
+    /// Execute the given command
+    /// </summary>
+    /// <param name="name">Name of the command</param>
+    /// <param name="jsonparams">Parameters for the command (will be deserialized from JSON)</param>
+    /// <returns>Unserialized result of the action, or new() for empty result</returns>
+    Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
+    {
+        return name switch
+        {
+            "reboot" => Reboot(jsonparams),
+            _ => throw new NotImplementedException($"Command {name} is not implemented on {dtmi}")
+        };
     }
 
     #endregion    

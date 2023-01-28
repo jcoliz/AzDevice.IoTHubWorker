@@ -67,6 +67,7 @@ public sealed class IoTHubWorker : BackgroundService
             await LoadInitialState();
 
             _logger.LogInformation(LogEvents.ExecuteDeviceInfo,"Device: {device}", _model);
+            _logger.LogInformation(LogEvents.ExecuteDeviceModel,"Model: {dtmi}", _model.dtmi);
 
             await ProvisionDevice();
             await OpenConnection();
