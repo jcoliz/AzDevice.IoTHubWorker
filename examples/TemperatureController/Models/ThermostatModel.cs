@@ -19,13 +19,16 @@ public class ThermostatModel : IComponentModel
 
     #region Telemetry
 
-    private double Temperature
+    public class Telemetry
     {
-        get
+        public Telemetry(double target)
         {
             var dt = DateTimeOffset.UtcNow;
-            return TargetTemp + dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0;            
+            Temperature = target + dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0;            
         }
+
+        [JsonPropertyName("temperature")]
+        public double Temperature { get; private set; }
     }
 
     #endregion
@@ -70,24 +73,26 @@ public class ThermostatModel : IComponentModel
     IDictionary<string, object> IComponentModel.GetTelemetry()
     {
         // Take the reading
-        var reading = Temperature;
+        var reading = new Telemetry(TargetTemp);
 
         // Update the minmaxreport
-        _minMaxReport.MaxTemp = Math.Max(_minMaxReport.MaxTemp, reading);
-        _minMaxReport.MinTemp = Math.Min(_minMaxReport.MinTemp, reading);
+        var temp = reading.Temperature;
+        _minMaxReport.MaxTemp = Math.Max(_minMaxReport.MaxTemp, temp);
+        _minMaxReport.MinTemp = Math.Min(_minMaxReport.MinTemp, temp);
         _minMaxReport.EndTime = DateTimeOffset.Now;
 
         // Obviously not a really good average! 🤣
-        _minMaxReport.AverageTemp = (_minMaxReport.MinTemp + _minMaxReport.MaxTemp + reading) / 3;
+        _minMaxReport.AverageTemp = (_minMaxReport.MinTemp + _minMaxReport.MaxTemp + temp) / 3;
 
         // Update maxtemp property
-        MaxTemp = Math.Max(MaxTemp, reading);
+        MaxTemp = Math.Max(MaxTemp, temp);
 
-        // Return the reading as telemetry
-        return new Dictionary<string, object>()
-        {
-            { "temperature", reading }
-        };
+        // Make a dictionary out of it        
+        var json = JsonSerializer.Serialize(reading);
+        var result = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+        // TODO: This could be moved to the worker
+
+        return result!;
     }
 
     object IComponentModel.SetProperty(string key, string jsonvalue)
