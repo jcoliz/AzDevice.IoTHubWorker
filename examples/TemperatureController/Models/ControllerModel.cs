@@ -31,16 +31,21 @@ public class ControllerModel : IRootModel
 
     #region Telemetry
 
-    private double WorkingSetKiB
+    public class Telemetry
     {
-        get
+        [JsonPropertyName("workingSet")]
+        public double WorkingSetKiB
         {
-            var ws = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64;
+            get
+            {
+                var ws = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64;
 
-            // Convert to Kibibits
-            return (double)ws / (1024.0/8.0);
+                // Convert to Kibibits
+                return (double)ws / (1024.0/8.0);
+            }
         }
     }
+
 
     #endregion
 
@@ -109,11 +114,15 @@ public class ControllerModel : IRootModel
 
     IDictionary<string, object> IComponentModel.GetTelemetry()
     {
-        // Return the reading as telemetry
-        return new Dictionary<string, object>()
-        {
-            { "workingSet", WorkingSetKiB }
-        };
+        // Take the reading
+        var reading = new Telemetry();
+
+        // Make a dictionary out of it        
+        var json = JsonSerializer.Serialize(reading);
+        var result = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+        // TODO: This could be moved to the worker
+
+        return result!;
     }
 
     object IComponentModel.SetProperty(string key, string jsonvalue)
