@@ -1,8 +1,16 @@
+// Copyright (C) 2023 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
+
 using AzDevice.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
 
+/// <summary>
+/// Implementation for IoT Plug-and-play example climate monitor
+/// </summary>
+/// <remarks>
+/// "dtmi:com:example:climatemonitor;1"
+/// </remarks>
 public class MonitorModel : IRootModel
 {
     #region Properties
@@ -16,7 +24,7 @@ public class MonitorModel : IRootModel
     //
     // Azure IoT Explorer does not have UI support for "geopoint". So, we'll wing it!
     //
-    // The spec does allog for "point", however, 
+    // The spec does allow for "point", however, 
     // "NOTE: Because GeoJSON is array-based (coordinates are stored in an 
     // array) and DTDL v2 does not support arrays in Properties, geospatial 
     // types cannot be used in Property schemas, but can be used in Telemetry 

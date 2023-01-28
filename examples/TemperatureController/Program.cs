@@ -1,3 +1,5 @@
+// Copyright (C) 2023 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
+
 using AzDevice;
 using AzDevice.Models;
 

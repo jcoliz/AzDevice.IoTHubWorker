@@ -1,5 +1,10 @@
+// Copyright (C) 2023 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
+
 using System.Text.Json.Serialization;
 
+/// <summary>
+/// Report showing statistics about temperatures over time
+/// </summary>
 public class MinMaxReportModel
 {
     [JsonPropertyName("maxTemp")]
