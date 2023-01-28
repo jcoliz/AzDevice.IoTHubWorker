@@ -127,6 +127,7 @@ public class MonitorModel : IRootModel
     #endregion
 
     #region Commands
+    // Nothing to see here
     #endregion
 
     #region Log Identity
@@ -140,6 +141,7 @@ public class MonitorModel : IRootModel
 
     TimeSpan IRootModel.TelemetryPeriod => _TelemetryPeriod;
 
+    // No subcomponents
     IDictionary<string, IComponentModel> IRootModel.Components { get; } = new Dictionary<string, IComponentModel>();
 
     #endregion
@@ -149,24 +151,15 @@ public class MonitorModel : IRootModel
     [JsonIgnore]
     public string dtmi => "dtmi:com:example:climatemonitor;1";
 
-    bool IComponentModel.HasTelemetry => true;
-
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
         throw new NotImplementedException($"Command {name} is not implemented on {dtmi}");
     }
 
-    IDictionary<string, object> IComponentModel.GetTelemetry()
+    object? IComponentModel.GetTelemetry()
     {
-        // Take a reading
-        var reading = new Telemetry();
-
-        // Make a dictionary out of it        
-        var json = JsonSerializer.Serialize(reading);
-        var result = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-        // TODO: This could be moved to the worker
-
-        return result!;
+        // Take a reading, return it
+        return new Telemetry();
     }
 
     object IComponentModel.SetProperty(string key, string jsonvalue)

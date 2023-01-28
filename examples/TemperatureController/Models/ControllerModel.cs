@@ -101,8 +101,6 @@ public class ControllerModel : IRootModel
     [JsonIgnore]
     public string dtmi => "dtmi:com:example:TemperatureController;2";
 
-    bool IComponentModel.HasTelemetry => true;
-
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
         return name switch
@@ -112,17 +110,10 @@ public class ControllerModel : IRootModel
         };
     }
 
-    IDictionary<string, object> IComponentModel.GetTelemetry()
+    object? IComponentModel.GetTelemetry()
     {
-        // Take the reading
-        var reading = new Telemetry();
-
-        // Make a dictionary out of it        
-        var json = JsonSerializer.Serialize(reading);
-        var result = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-        // TODO: This could be moved to the worker
-
-        return result!;
+        // Take the reading, return it
+        return new Telemetry();
     }
 
     object IComponentModel.SetProperty(string key, string jsonvalue)

@@ -63,8 +63,6 @@ public class DeviceInformationModel: IComponentModel
     #region IComponentModel
     string IComponentModel.dtmi => "dtmi:azure:DeviceManagement:DeviceInformation;1";
 
-    bool IComponentModel.HasTelemetry => false;
-
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
         throw new NotImplementedException();
@@ -75,9 +73,9 @@ public class DeviceInformationModel: IComponentModel
         return this as DeviceInformationModel;
     }
 
-    IDictionary<string, object> IComponentModel.GetTelemetry()
+    object? IComponentModel.GetTelemetry()
     {
-        throw new NotImplementedException();
+        return null;
     }
 
     object IComponentModel.SetProperty(string key, string jsonvalue)

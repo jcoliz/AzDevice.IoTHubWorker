@@ -59,8 +59,6 @@ public class ThermostatModel : IComponentModel
     [JsonIgnore]
     public string dtmi => "dtmi:com:example:Thermostat;1";
 
-    bool IComponentModel.HasTelemetry => true;
-
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
         return name switch
@@ -70,7 +68,7 @@ public class ThermostatModel : IComponentModel
         };
     }
  
-    IDictionary<string, object> IComponentModel.GetTelemetry()
+    object? IComponentModel.GetTelemetry()
     {
         // Take the reading
         var reading = new Telemetry(TargetTemp);
@@ -87,12 +85,7 @@ public class ThermostatModel : IComponentModel
         // Update maxtemp property
         MaxTemp = Math.Max(MaxTemp, temp);
 
-        // Make a dictionary out of it        
-        var json = JsonSerializer.Serialize(reading);
-        var result = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-        // TODO: This could be moved to the worker
-
-        return result!;
+        return reading;
     }
 
     object IComponentModel.SetProperty(string key, string jsonvalue)

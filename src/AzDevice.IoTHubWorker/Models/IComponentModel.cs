@@ -6,13 +6,11 @@ public interface IComponentModel
 {
     string dtmi { get; }
 
-    bool HasTelemetry { get; }
-
     object SetProperty(string key, string jsonvalue);
 
     object GetProperties();
 
-    IDictionary<string,object> GetTelemetry();
+    object? GetTelemetry();
 
     Task<object> DoCommandAsync(string name, string jsonparams);
 

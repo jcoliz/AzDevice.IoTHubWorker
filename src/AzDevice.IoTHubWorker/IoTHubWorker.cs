@@ -322,55 +322,54 @@ public sealed class IoTHubWorker : BackgroundService
 
         // Send telementry from root
 
-        if (_model.HasTelemetry && _model.TelemetryPeriod > TimeSpan.Zero)
+        if (_model.TelemetryPeriod > TimeSpan.Zero)
         {
-            // Obtain readings from this component
+            // Obtain readings from the root
             var readings = _model.GetTelemetry();
 
-            // Send them
-            await SendTelemetryMessageAsync(readings, null);
-            ++numsent;
-        }
-
-        // Send telemetry from components
-
-        foreach(var kvp in _model.Components)
-        {
-            if (kvp.Value.HasTelemetry)
+            // If telemetry exists
+            if (readings is not null)
             {
-                // Note that official PnP messages can only come from a single component at a time.
-                // This is a weakness that drives up the message count. So, will have to decide later
-                // if it's worth keeping this, or scrapping PnP compatibility and collecting them all
-                // into a single message.
-
-                // Obtain readings from this component
-                var readings = kvp.Value.GetTelemetry();
-
                 // Send them
-                await SendTelemetryMessageAsync(readings, kvp);
+                await SendTelemetryMessageAsync(readings, null);
                 ++numsent;
             }
-        }
 
-        if (numsent > 0)
-            _logger.LogInformation(LogEvents.TelemetryOK,"Telemetry: OK {count} messages",numsent);            
+            // Send telemetry from components
+
+            foreach(var kvp in _model.Components)
+            {
+                // Obtain readings from this component
+                readings = kvp.Value.GetTelemetry();
+                if (readings is not null)
+                {
+                    // Note that official PnP messages can only come from a single component at a time.
+                    // This is a weakness that drives up the message count. So, will have to decide later
+                    // if it's worth keeping this, or scrapping PnP compatibility and collecting them all
+                    // into a single message.
+
+                    // Send them
+                    await SendTelemetryMessageAsync(readings, kvp);
+                    ++numsent;
+                }
+            }
+
+            if (numsent > 0)
+                _logger.LogInformation(LogEvents.TelemetryOK,"Telemetry: OK {count} messages",numsent);            
+            else
+                _logger.LogWarning(LogEvents.TelemetryNotSent,"Telemetry: No components had available readings. Nothing sent");
+        }
         else
-            _logger.LogWarning(LogEvents.TelemetryNotSent,"Telemetry: No components had available readings. Nothing sent");
+            _logger.LogWarning(LogEvents.TelemetryNoPeriod,"Telemetry: Telemetry period not configured. Nothing sent");
     }
 
-    private async Task SendTelemetryMessageAsync(IDictionary<string, object> telemetryPairs, KeyValuePair<string, IComponentModel>? component = default)
+    private async Task SendTelemetryMessageAsync(object telemetry, KeyValuePair<string, IComponentModel>? component = default)
     {
         // Make a message out of it
-        using var message = CreateTelemetryMessage(telemetryPairs,component?.Key);
+        using var message = CreateTelemetryMessage(telemetry,component?.Key);
 
         // Send the message
         await iotClient!.SendEventAsync(message);
-        var detailslist = telemetryPairs.Select(x=>$"{x.Key}={x.Value:F1}");
-        var details = string.Join(' ',detailslist);
-        if (component is null)
-            _logger.LogDebug(LogEvents.TelemetrySentRoot,"Telemetry: Root {details}", details);
-        else
-            _logger.LogDebug(LogEvents.TelemetrySentOne,"Telemetry: {component} {id} {details}", component?.Key, component?.Value, details);
     }
 
     // Below is from https://github.com/Azure/azure-iot-sdk-csharp/blob/1e97d800061aca1ab812ea32d47bac2442c1ed26/iothub/device/samples/solutions/PnpDeviceSamples/PnpConvention/PnpConvention.cs#L40
@@ -379,19 +378,14 @@ public sealed class IoTHubWorker : BackgroundService
     /// Create a plug and play compatible telemetry message.
     /// </summary>
     /// <param name="componentName">The name of the component in which the telemetry is defined. Can be null for telemetry defined under the root interface.</param>
-    /// <param name="telemetryPairs">The unserialized name and value telemetry pairs, as defined in the DTDL interface. Names must be 64 characters or less. For more details see
+    /// <param name="telemetry">The unserialized name and value telemetry pairs, as defined in the DTDL interface. Names must be 64 characters or less. For more details see
     /// <see href="https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#telemetry"/>.</param>
     /// <param name="encoding">The character encoding to be used when encoding the message body to bytes. This defaults to utf-8.</param>
     /// <returns>A plug and play compatible telemetry message, which can be sent to IoT Hub. The caller must dispose this object when finished.</returns>
-    public static Message CreateTelemetryMessage(IDictionary<string, object> telemetryPairs, string? componentName = default, Encoding? encoding = default)
+    public Message CreateTelemetryMessage(object telemetry, string? componentName = default, Encoding? encoding = default)
     {
-        if (telemetryPairs == null)
-        {
-            throw new ArgumentNullException(nameof(telemetryPairs));
-        }
-
         Encoding messageEncoding = encoding ?? Encoding.UTF8;
-        string payload = JsonSerializer.Serialize(telemetryPairs);
+        string payload = JsonSerializer.Serialize(telemetry);
         var message = new Message(messageEncoding.GetBytes(payload))
         {
             ContentEncoding = messageEncoding.WebName,
@@ -402,6 +396,12 @@ public sealed class IoTHubWorker : BackgroundService
         {
             message.ComponentName = componentName;
         }
+
+        // Log about it
+        if (componentName is null)
+            _logger.LogDebug(LogEvents.TelemetrySentRoot,"Telemetry: Root {details}", payload);
+        else
+            _logger.LogDebug(LogEvents.TelemetrySentOne,"Telemetry: {component} {details}", componentName, payload);
 
         return message;
     }
