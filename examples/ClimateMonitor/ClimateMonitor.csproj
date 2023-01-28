@@ -27,7 +27,11 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="pwsh --command &quot; &amp;&apos;$(ProjectDir)scripts\Update-Version.ps1&apos; &gt; &apos;$(ProjectDir)version.json&apos; &quot;" />
+    <Exec Command="pwsh --command &quot; &amp;&apos;$(ProjectDir)scripts\Update-Version.ps1&apos; &gt; &apos;$(ProjectDir)version.txt&apos; &quot;" />
   </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Include="version.txt" />  
+  </ItemGroup>
 
 </Project>

@@ -8,4 +8,4 @@ else
     $Version = "local-$Commit"
 }
 
-Write-Output "{ ""Version"": ""$Version"" }"
+Write-Output $Version

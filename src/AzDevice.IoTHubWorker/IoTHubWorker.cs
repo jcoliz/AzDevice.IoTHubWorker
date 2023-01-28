@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 
@@ -131,10 +132,22 @@ public sealed class IoTHubWorker : BackgroundService
                 _logger.LogWarning(LogEvents.ConfigNoExists,"Initial State: Not specified");
             }
 
-            // Where to store the software build version is solution-dependent.
-            // Thus, we will pass it in as a root-level "Version" initial state, and let the
-            // solution decide what to do with it.
-            _model.SetInitialState(new Dictionary<string,string>() {{ "Version", _config["Version"] }});
+            // We allow for the build system to inject a resource named "version.txt"
+            // which contains the software build version. If it's not here, we'll just
+            // continue with no version information.
+            var assembly = Assembly.GetAssembly(_model.GetType());
+            var resource = assembly!.GetManifestResourceNames().Where(x => x.EndsWith(".version.txt")).SingleOrDefault();
+            if (resource is not null)
+            {
+                using var stream = assembly.GetManifestResourceStream(resource);
+                using var streamreader = new StreamReader(stream!);
+                var version = streamreader.ReadLine();
+
+                // Where to store the software build version is solution-dependent.
+                // Thus, we will pass it in as a root-level "Version" initial state, and let the
+                // solution decide what to do with it.
+                _model.SetInitialState(new Dictionary<string,string>() {{ "Version", version! }});
+            }
         }
         catch (Exception ex)
         {

@@ -12,6 +12,7 @@
 config.toml*
 .env.ps1
 version.json
+version.txt
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
