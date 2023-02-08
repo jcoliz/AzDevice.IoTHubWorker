@@ -1,0 +1,216 @@
+[
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:azdevice:temphumidity;1",
+    "@type": "Interface",
+    "displayName": {
+      "en": "AzDevices Example Temp/Humidity Controller v1"
+    },
+    "contents": [
+      {
+        "@type": "Property",
+        "displayName": {
+          "en": "Serial Number"
+        },
+        "name": "serialNumber",
+        "schema": "string",
+        "writable": false
+      },
+      {
+        "@type": "Property",
+        "name": "TelemetryPeriod",
+        "writable": true,
+        "schema": "duration"
+      },
+      {
+        "@type": "Property",
+        "displayName": {
+          "en": "Start time"
+        },
+        "name": "StartTimeUTC",
+        "schema": "dateTime",
+        "writable": false
+      },
+      {
+        "@type": "Property",
+        "displayName": {
+          "en": "Heartbeat"
+        },
+        "name": "HeartbeatUTC",
+        "schema": "dateTime",
+        "writable": false
+      },
+      {
+        "@type": "Component",
+        "name": "Sensor_1",
+        "schema": "dtmi:azdevice:shtc3;1"
+      },
+      {
+        "@type": "Component",
+        "name": "Info",
+        "schema": "dtmi:azure:DeviceManagement:DeviceInformation;1"
+      }
+    ]
+  },
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:azdevice:shtc3;1",
+    "@type": "Interface",
+    "displayName": {
+      "en": "Sensiron SHTC3 Humidity and Temperature Sensor IC"
+    },
+    "description": "The SHTC3 is a digital humidity and temperature sensor designed especially for battery-driven high-volume consumer electronics applications",
+    "contents": [
+      {
+        "@type": [
+          "Telemetry",
+          "Temperature"
+        ],
+        "name": "temperature",
+        "schema": "double",
+        "displayName": {
+          "en": "Temperature"
+        },
+        "unit": "degreeCelsius"
+      },
+      {
+        "@type": [
+          "Telemetry",
+          "RelativeHumidity"
+        ],
+        "name": "humidity",
+        "schema": "double",
+        "displayName": {
+          "en": "Humidity"
+        },
+        "unit": "percent"
+      },
+      {
+        "@type": [
+          "Telemetry"
+        ],
+        "name": "ok",
+        "schema": "boolean",
+        "displayName": {
+          "en": "sensor functioning ok"
+        }
+      },
+      {
+        "@type": [
+          "Property",
+          "Temperature"
+        ],
+        "name": "currentTemperature",
+        "schema": "double",
+        "displayName": {
+          "en": "Current Temperature"
+        },
+        "unit": "degreeCelsius",
+        "writable": false
+      },
+      {
+        "@type": [
+          "Property",
+          "RelativeHumidity"
+        ],
+        "name": "currentHumidity",
+        "schema": "double",
+        "displayName": {
+          "en": "Current Humidity"
+        },
+        "unit": "percent",
+        "writable": false
+      },
+      {
+        "@type": [
+          "Property",
+          "Temperature"
+        ],
+        "name": "temperatureCorrection",
+        "schema": "double",
+        "displayName": {
+          "en": "Correction value to apply for temperature readings"
+        },
+        "unit": "degreeCelsius",
+        "writable": true
+      },
+      {
+        "@type": [
+          "Property",
+          "RelativeHumidity"
+        ],
+        "name": "humidityCorrection",
+        "schema": "double",
+        "displayName": {
+          "en": "Correction value to apply for humidity readings"
+        },
+        "unit": "percent",
+        "writable": true
+      }
+    ]
+  },
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:azure:DeviceManagement:DeviceInformation;1",
+    "@type": "Interface",
+    "displayName": "Device Information",
+    "contents": [
+      {
+        "@type": "Property",
+        "name": "manufacturer",
+        "displayName": "Manufacturer",
+        "schema": "string",
+        "description": "Company name of the device manufacturer. This could be the same as the name of the original equipment manufacturer (OEM). Ex. Contoso."
+      },
+      {
+        "@type": "Property",
+        "name": "model",
+        "displayName": "Device model",
+        "schema": "string",
+        "description": "Device model name or ID. Ex. Surface Book 2."
+      },
+      {
+        "@type": "Property",
+        "name": "swVersion",
+        "displayName": "Software version",
+        "schema": "string",
+        "description": "Version of the software on your device. This could be the version of your firmware. Ex. 1.3.45"
+      },
+      {
+        "@type": "Property",
+        "name": "osName",
+        "displayName": "Operating system name",
+        "schema": "string",
+        "description": "Name of the operating system on the device. Ex. Windows 10 IoT Core."
+      },
+      {
+        "@type": "Property",
+        "name": "processorArchitecture",
+        "displayName": "Processor architecture",
+        "schema": "string",
+        "description": "Architecture of the processor on the device. Ex. x64 or ARM."
+      },
+      {
+        "@type": "Property",
+        "name": "processorManufacturer",
+        "displayName": "Processor manufacturer",
+        "schema": "string",
+        "description": "Name of the manufacturer of the processor on the device. Ex. Intel."
+      },
+      {
+        "@type": "Property",
+        "name": "totalStorage",
+        "displayName": "Total storage",
+        "schema": "double",
+        "description": "Total available storage on the device in kilobytes. Ex. 2048000 kilobytes."
+      },
+      {
+        "@type": "Property",
+        "name": "totalMemory",
+        "displayName": "Total memory",
+        "schema": "double",
+        "description": "Total available memory on the device in kilobytes. Ex. 256000 kilobytes."
+      }
+    ]
+  }
+]

@@ -1,0 +1,97 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:azdevice:shtc3;1",
+    "@type": "Interface",
+    "displayName": {
+        "en": "Sensiron SHTC3 Humidity and Temperature Sensor IC"
+    },
+    "description": "The SHTC3 is a digital humidity and temperature sensor designed especially for battery-driven high-volume consumer electronics applications",
+    "contents": [
+        {
+            "@type": [
+                "Telemetry",
+                "Temperature"
+            ],
+            "name": "temperature",
+            "schema": "double",
+            "displayName": {
+                "en": "Temperature"
+            },
+            "unit": "degreeCelsius"
+        },
+        {
+            "@type": [
+                "Telemetry",
+                "RelativeHumidity"
+            ],
+            "name": "humidity",
+            "schema": "double",
+            "displayName": {
+                "en": "Humidity"
+            },
+            "unit": "percent"
+        },
+        {
+            "@type": [
+                "Telemetry"
+            ],
+            "name": "ok",
+            "schema": "boolean",
+            "displayName": {
+                "en": "sensor functioning ok"
+            }
+        },
+        {
+            "@type": [
+                "Property",
+                "Temperature"
+            ],
+            "name": "currentTemperature",
+            "schema": "double",
+            "displayName": {
+                "en": "Current Temperature"
+            },
+            "unit": "degreeCelsius",
+            "writable": false
+        },
+        {
+            "@type": [
+                "Property",
+                "RelativeHumidity"
+            ],
+            "name": "currentHumidity",
+            "schema": "double",
+            "displayName": {
+                "en": "Current Humidity"
+            },
+            "unit": "percent",
+            "writable": false
+        },
+        {
+            "@type": [
+                "Property",
+                "Temperature"
+            ],
+            "name": "temperatureCorrection",
+            "schema": "double",
+            "displayName": {
+                "en": "Correction value to apply for temperature readings"
+            },
+            "unit": "degreeCelsius",
+            "writable": true
+        },
+        {
+            "@type": [
+                "Property",
+                "RelativeHumidity"
+            ],
+            "name": "humidityCorrection",
+            "schema": "double",
+            "displayName": {
+                "en": "Correction value to apply for humidity readings"
+            },
+            "unit": "percent",
+            "writable": true
+        }
+    ]
+}
