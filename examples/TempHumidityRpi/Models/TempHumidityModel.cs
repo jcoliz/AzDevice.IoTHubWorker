@@ -9,16 +9,12 @@ public class TempHumidityModel : IRootModel
 {
     #region Properties
 
-    [JsonPropertyName("SerialNumber")]
     public string? SerialNumber { get; private set; } = "Unassigned";
 
-    [JsonPropertyName("HeartbeatUTC")]
     public DateTimeOffset HeartbeatUTC => DateTimeOffset.UtcNow;
 
-    [JsonPropertyName("StartTimeUTC")]
     public DateTimeOffset StartTimeUTC { get; } = DateTimeOffset.UtcNow;
 
-    [JsonPropertyName("TelemetryPeriod")]
     public string TelemetryPeriod 
     { 
         get
@@ -44,7 +40,7 @@ public class TempHumidityModel : IRootModel
     /// <summary>
     /// How should this model appear in the logs?
     /// </summary>
-    /// <returns>String to identify the current model</returns>
+    /// <returns>String to identify the current device</returns>
     public override string ToString()
     {
         return $"S/N:{SerialNumber} ver:{DeviceInformation.SoftwareVersion}";

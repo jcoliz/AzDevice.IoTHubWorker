@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using Iot.Device.Shtc3;
 
 /// <summary>
-/// SHTC3 - Temperature & Humidity Sensor
+/// SHTC3 Temperature & Humidity Sensor physical sensor interface
 /// </summary>
 public class Shtc3Physical: IDisposable
 {
@@ -12,11 +12,12 @@ public class Shtc3Physical: IDisposable
     private readonly Shtc3 _sensor;
     private bool disposedValue;
 
-    [JsonPropertyName("Temperature")]
     public double Temperature { get; private set; }
 
-    [JsonPropertyName("Humidity")]
     public double Humidity { get; private set; }
+
+    // NOTE: All public properties will be sent as telemetry, unless they are explicitly
+    // ignored.
 
     [JsonIgnore]
     public int Id { get; private set; }

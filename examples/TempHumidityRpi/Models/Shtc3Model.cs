@@ -11,38 +11,35 @@ public class Shtc3Model :  IComponentModel
     [JsonPropertyName("__t")]
     public string ComponentID => "c";
 
-    [JsonPropertyName("Id")]
     public int Id => PhysicalSensor?.Id ?? Int32.MaxValue;
 
-    [JsonPropertyName("CurrentTemperature")]
     public double CurrentTemperature { get; private set; }
 
-    [JsonPropertyName("CurrentHumidity")]
     public double CurrentHumidity { get; private set; }
 
-    [JsonPropertyName("TemperatureCorrection")]
     public double TemperatureCorrection { get; set; }
 
-    [JsonPropertyName("HumidityCorrection")]
     public double HumidityCorrection { get; set; }
 
     #endregion
 
     #region Telemetry
 
-    public class Telemetry
+    /// <summary>
+    /// Generates simulated telemetry in case we don't have an actual sensor
+    /// attached
+    /// </summary>
+    public class SimulatedTelemetry
     {
-        public Telemetry()
+        public SimulatedTelemetry()
         {
             var dt = DateTimeOffset.UtcNow;
             Temperature = dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0;            
             Humidity = (dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0) / 2400.0;
         }
 
-        [JsonPropertyName("Temperature")]
         public double Temperature { get; private set; }
 
-        [JsonPropertyName("Humidity")]
         public double Humidity { get; private set; }
     }
 
@@ -94,7 +91,7 @@ public class Shtc3Model :  IComponentModel
         else
         {
             // Take the reading
-            var reading = new Telemetry();
+            var reading = new SimulatedTelemetry();
 
             // Update the properties which track the current values
             CurrentHumidity = reading.Humidity;
