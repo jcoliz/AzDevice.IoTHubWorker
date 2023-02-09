@@ -1,0 +1,11 @@
+[Unit]
+Description=Temperature+Humidity Example
+
+[Service]
+Type=notify
+Environment="DOTNET_ROOT=/opt/dotnet"
+WorkingDirectory=/opt/TempHumidityRpi
+ExecStart=/opt/TempHumidityRpi/TempHumidityRpi
+
+[Install]
+WantedBy=multi-user.target

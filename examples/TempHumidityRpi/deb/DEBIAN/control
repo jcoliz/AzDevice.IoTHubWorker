@@ -1,0 +1,3 @@
+Description: Example temperature and humidity sender
+ This is a sample for Azure IoT Device Worker
+Maintainer: James Coliz <jcoliz@outlook.com>
