@@ -1,8 +1,10 @@
-using System;
 using System.Device.I2c;
 using System.Text.Json.Serialization;
 using Iot.Device.Shtc3;
 
+/// <summary>
+/// SHTC3 - Temperature & Humidity Sensor
+/// </summary>
 public class Shtc3Physical: IDisposable
 {
     private readonly I2cConnectionSettings _settings;
@@ -36,6 +38,7 @@ public class Shtc3Physical: IDisposable
             {
                 Temperature = temperature.DegreesCelsius;
                 Humidity = relativeHumidity.Percent;
+                result = true;
             }
         }
         catch

@@ -89,7 +89,6 @@ public class Shtc3Model :  IComponentModel
             }
             else
                 return null;
-
         }
         // Otherwise, use simulated telemetry
         else
