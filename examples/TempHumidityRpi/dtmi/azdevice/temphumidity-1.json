@@ -11,7 +11,7 @@
             "displayName": {
               "en": "Serial Number"
             },
-            "name": "serialNumber",
+            "name": "SerialNumber",
             "schema": "string",
             "writable": false
         },

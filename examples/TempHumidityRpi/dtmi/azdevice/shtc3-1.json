@@ -12,7 +12,7 @@
                 "Telemetry",
                 "Temperature"
             ],
-            "name": "temperature",
+            "name": "Temperature",
             "schema": "double",
             "displayName": {
                 "en": "Temperature"
@@ -24,7 +24,7 @@
                 "Telemetry",
                 "RelativeHumidity"
             ],
-            "name": "humidity",
+            "name": "Humidity",
             "schema": "double",
             "displayName": {
                 "en": "Humidity"
@@ -35,7 +35,7 @@
             "@type": [
                 "Property"
             ],
-            "name": "id",
+            "name": "Id",
             "schema": "integer",
             "displayName": {
                 "en": "Sensor Identifier"
@@ -48,7 +48,7 @@
                 "Property",
                 "Temperature"
             ],
-            "name": "currentTemperature",
+            "name": "CurrentTemperature",
             "schema": "double",
             "displayName": {
                 "en": "Current Temperature"
@@ -61,7 +61,7 @@
                 "Property",
                 "RelativeHumidity"
             ],
-            "name": "currentHumidity",
+            "name": "CurrentHumidity",
             "schema": "double",
             "displayName": {
                 "en": "Current Humidity"
@@ -74,7 +74,7 @@
                 "Property",
                 "Temperature"
             ],
-            "name": "temperatureCorrection",
+            "name": "TemperatureCorrection",
             "schema": "double",
             "displayName": {
                 "en": "Correction value to apply for temperature readings"
@@ -87,7 +87,7 @@
                 "Property",
                 "RelativeHumidity"
             ],
-            "name": "humidityCorrection",
+            "name": "HumidityCorrection",
             "schema": "double",
             "displayName": {
                 "en": "Correction value to apply for humidity readings"
