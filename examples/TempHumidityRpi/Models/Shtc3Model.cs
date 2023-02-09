@@ -12,7 +12,7 @@ public class Shtc3Model :  IComponentModel
     public string ComponentID => "c";
 
     [JsonPropertyName("Id")]
-    public int Id { get; private set; }
+    public int Id => PhysicalSensor?.Id ?? Int32.MaxValue;
 
     [JsonPropertyName("CurrentTemperature")]
     public double CurrentTemperature { get; private set; }
@@ -52,6 +52,13 @@ public class Shtc3Model :  IComponentModel
     #endregion
 
     #region Fields
+    /// <summary>
+    /// Connection to physical sensors
+    /// </summary>
+    /// <remarks>
+    /// Or (null), indicating we are sending simulated sensor data
+    /// </remarks>
+    private Shtc3Physical? PhysicalSensor = null;
     #endregion
 
     #region IComponentModel
@@ -68,18 +75,35 @@ public class Shtc3Model :  IComponentModel
     /// <returns>All telemetry we wish to send at this time, or null for don't send any</returns>
     object? IComponentModel.GetTelemetry()
     {
-        // This is a good time to collect the Id from the sensor
-        Id = Int32.MaxValue;
+        // If we have a physical sensor connected, use that
+        if (PhysicalSensor is not null)
+        {
+            if (PhysicalSensor.TryUpdate())
+            {
+                // Update the properties which track the current values
+                CurrentHumidity = PhysicalSensor.Humidity;
+                CurrentTemperature = PhysicalSensor.Temperature;
 
-        // Take the reading
-        var reading = new Telemetry();
+                // Return it
+                return PhysicalSensor;
+            }
+            else
+                return null;
 
-        // Update the properties which track the current values
-        CurrentHumidity = reading.Humidity;
-        CurrentTemperature = reading.Temperature;
+        }
+        // Otherwise, use simulated telemetry
+        else
+        {
+            // Take the reading
+            var reading = new Telemetry();
 
-        // Return it
-        return new Telemetry();
+            // Update the properties which track the current values
+            CurrentHumidity = reading.Humidity;
+            CurrentTemperature = reading.Temperature;
+
+            // Return it
+            return reading;
+        }
     }
 
     /// <summary>
@@ -119,6 +143,15 @@ public class Shtc3Model :  IComponentModel
 
         if (values.ContainsKey("HumidityCorrection"))
             HumidityCorrection = Convert.ToDouble(values["HumidityCorrection"]);
+
+        if (values.ContainsKey("Physical"))
+        {
+            var usephysical = Convert.ToBoolean(values["Physical"]);
+            if (usephysical)
+            {
+                PhysicalSensor = new Shtc3Physical();
+            }
+        }
     }
 
     /// <summary>
