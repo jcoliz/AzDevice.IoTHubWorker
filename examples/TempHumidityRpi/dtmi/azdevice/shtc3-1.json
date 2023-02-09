@@ -33,13 +33,15 @@
         },
         {
             "@type": [
-                "Telemetry"
+                "Property"
             ],
-            "name": "ok",
-            "schema": "boolean",
+            "name": "id",
+            "schema": "integer",
             "displayName": {
-                "en": "sensor functioning ok"
-            }
+                "en": "Sensor Identifier"
+            },
+            "description": "The SHTC3 has an ID register which contains an SHTC3-specific product code. The read-out of the ID register can be used to verify the presence of the sensor and proper communication.",
+            "writable": false
         },
         {
             "@type": [
