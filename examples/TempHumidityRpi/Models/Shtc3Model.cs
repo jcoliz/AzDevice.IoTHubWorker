@@ -27,8 +27,12 @@ public class Shtc3Model :  IComponentModel
 
     /// <summary>
     /// Generates simulated telemetry in case we don't have an actual sensor
-    /// attached
+    /// attached.
     /// </summary>
+    /// <remarks>
+    /// Whether or not we are running with a real sensor is a runtime decision
+    /// based on "Initial State" configuration.
+    /// </remarks>
     public class SimulatedTelemetry
     {
         public SimulatedTelemetry()
@@ -46,6 +50,20 @@ public class Shtc3Model :  IComponentModel
     #endregion
 
     #region Commands
+    #endregion
+
+    #region Log Identity
+    /// <summary>
+    /// How should this component appear in the logs?
+    /// </summary>
+    /// <returns>String to identify the current device</returns>
+    public override string ToString()
+    {
+        if (PhysicalSensor is null)
+            return "Simulated SHTC3";
+        else
+            return $"Physical SHTC3 ID#{PhysicalSensor.Id}";
+    }
     #endregion
 
     #region Fields

@@ -43,7 +43,7 @@ public class TempHumidityModel : IRootModel
     /// <returns>String to identify the current device</returns>
     public override string ToString()
     {
-        return $"S/N:{SerialNumber} ver:{DeviceInformation.SoftwareVersion}";
+        return $"S/N:{SerialNumber} ver:{DeviceInformation.SoftwareVersion} sensor:{Sensor}";
     }
     #endregion
 
@@ -73,6 +73,7 @@ public class TempHumidityModel : IRootModel
 
     #region Internals
     private DeviceInformationModel DeviceInformation => (Components["Info"] as DeviceInformationModel)!;
+    private Shtc3Model Sensor => (Components["Sensor_1"] as Shtc3Model)!;
     #endregion
 
     #region IComponentModel
