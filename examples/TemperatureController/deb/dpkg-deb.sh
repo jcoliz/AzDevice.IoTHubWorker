@@ -1,6 +1,6 @@
 #!/bin/bash
 mkdir -p publish_output/etc/systemd/system
-cp deb/tempcontroller.service publish_output/etc/systemd/system
+cp deb/*.service publish_output/etc/systemd/system
 cp -R deb/DEBIAN publish_output/
 chmod -R 0775 publish_output/DEBIAN
 echo "Package: $2" >> publish_output/DEBIAN/control
