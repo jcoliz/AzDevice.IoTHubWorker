@@ -151,7 +151,7 @@ public sealed class IoTHubWorker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(LogEvents.ConfigError,"Initial State: Error {message}", ex.Message);
+            _logger.LogCritical(LogEvents.ConfigFailed,"Initial State: Failed {message}", ex.Message);
             throw;
         }
 
@@ -263,7 +263,7 @@ public sealed class IoTHubWorker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(LogEvents.ConnectError,"Connection: Error {message}", ex.Message);
+            _logger.LogCritical(LogEvents.ConnectFailed,"Connection: Failed {message}", ex.Message);
             throw new ApplicationException("Connection to IoT Hub failed", ex);
         }
     }
@@ -315,12 +315,12 @@ public sealed class IoTHubWorker : BackgroundService
         {
             foreach (Exception exception in ex.InnerExceptions)
             {
-                _logger.LogError(LogEvents.CommandMultipleFailure, exception, "Command: {command} Multiple failures", command);
+                _logger.LogError(LogEvents.CommandMultipleErrors, exception, "Command: {command} Multiple Errors", command);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(LogEvents.CommandSingleFailure,ex,"Command: {command} Failed", command);
+            _logger.LogError(LogEvents.CommandSingleError,ex,"Command: {command} Error", command);
         }
         return new MethodResponse(Encoding.UTF8.GetBytes("{}"), (int)HttpStatusCode.InternalServerError);
     }
@@ -332,49 +332,63 @@ public sealed class IoTHubWorker : BackgroundService
     /// </summary>
     private async Task SendTelemetry()
     {
-        int numsent = 0;
-
-        // Send telementry from root
-
-        if (_model.TelemetryPeriod > TimeSpan.Zero)
+        try
         {
-            // Obtain readings from the root
-            var readings = _model.GetTelemetry();
+            int numsent = 0;
 
-            // If telemetry exists
-            if (readings is not null)
+            // Send telementry from root
+
+            if (_model.TelemetryPeriod > TimeSpan.Zero)
             {
-                // Send them
-                await SendTelemetryMessageAsync(readings, null);
-                ++numsent;
-            }
+                // Obtain readings from the root
+                var readings = _model.GetTelemetry();
 
-            // Send telemetry from components
-
-            foreach(var kvp in _model.Components)
-            {
-                // Obtain readings from this component
-                readings = kvp.Value.GetTelemetry();
+                // If telemetry exists
                 if (readings is not null)
                 {
-                    // Note that official PnP messages can only come from a single component at a time.
-                    // This is a weakness that drives up the message count. So, will have to decide later
-                    // if it's worth keeping this, or scrapping PnP compatibility and collecting them all
-                    // into a single message.
-
                     // Send them
-                    await SendTelemetryMessageAsync(readings, kvp);
+                    await SendTelemetryMessageAsync(readings, null);
                     ++numsent;
                 }
-            }
 
-            if (numsent > 0)
-                _logger.LogInformation(LogEvents.TelemetryOK,"Telemetry: OK {count} messages",numsent);            
+                // Send telemetry from components
+
+                foreach(var kvp in _model.Components)
+                {
+                    // Obtain readings from this component
+                    readings = kvp.Value.GetTelemetry();
+                    if (readings is not null)
+                    {
+                        // Note that official PnP messages can only come from a single component at a time.
+                        // This is a weakness that drives up the message count. So, will have to decide later
+                        // if it's worth keeping this, or scrapping PnP compatibility and collecting them all
+                        // into a single message.
+
+                        // Send them
+                        await SendTelemetryMessageAsync(readings, kvp);
+                        ++numsent;
+                    }
+                }
+
+                if (numsent > 0)
+                    _logger.LogInformation(LogEvents.TelemetryOK,"Telemetry: OK {count} messages",numsent);            
+                else
+                    _logger.LogWarning(LogEvents.TelemetryNotSent,"Telemetry: No components had available readings. Nothing sent");
+            }
             else
-                _logger.LogWarning(LogEvents.TelemetryNotSent,"Telemetry: No components had available readings. Nothing sent");
+                _logger.LogWarning(LogEvents.TelemetryNoPeriod,"Telemetry: Telemetry period not configured. Nothing sent");
         }
-        else
-            _logger.LogWarning(LogEvents.TelemetryNoPeriod,"Telemetry: Telemetry period not configured. Nothing sent");
+        catch (AggregateException ex)
+        {
+            foreach (Exception exception in ex.InnerExceptions)
+            {
+                _logger.LogError(LogEvents.TelemetryMultipleError, exception, "Telemetry: Multiple Errors");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(LogEvents.TelemetrySingleError,ex,"Telemetry: Error");
+        }
     }
 
     private async Task SendTelemetryMessageAsync(object telemetry, KeyValuePair<string, IComponentModel>? component = default)
@@ -459,7 +473,7 @@ public sealed class IoTHubWorker : BackgroundService
 
                                 // Update the property
                                 var updated = component.SetProperty(child.Name,child.Value.ToString());
-                                _logger.LogInformation(LogEvents.PropertyComponentOK,"Property: Component OK. Updated {property} to {updated}",fullpropname,updated);
+                                _logger.LogInformation(LogEvents.PropertyUpdateComponentOK,"Property: Component OK. Updated {property} to {updated}",fullpropname,updated);
 
                                 // Acknowledge the request back to hub
                                 await RespondPropertyUpdate(fullpropname,updated,desiredProperties.Version);
@@ -471,7 +485,7 @@ public sealed class IoTHubWorker : BackgroundService
                     {
                         // Update the property
                         var updated = _model.SetProperty(prop.Key,prop.Value.ToString()!);
-                        _logger.LogInformation(LogEvents.PropertyOK,"Property: OK. Updated {property} to {updated}",fullpropname,updated);
+                        _logger.LogInformation(LogEvents.PropertyUpdateOK,"Property: OK. Updated {property} to {updated}",fullpropname,updated);
 
                         // Acknowledge the request back to hub
                         await RespondPropertyUpdate(fullpropname,updated,desiredProperties.Version);
@@ -479,7 +493,7 @@ public sealed class IoTHubWorker : BackgroundService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(LogEvents.PropertyUpdateFailure,ex,"Property: Update failed for {property}",fullpropname);
+                    _logger.LogError(LogEvents.PropertyUpdateError,ex,"Property: Update error for {property}",fullpropname);
                 }
             }
         }
@@ -487,12 +501,12 @@ public sealed class IoTHubWorker : BackgroundService
         {
             foreach (Exception exception in ex.InnerExceptions)
             {
-                _logger.LogError(LogEvents.PropertyMultipleFailure, exception, "Property: Multiple update failures");
+                _logger.LogError(LogEvents.PropertyMultipleErrors, exception, "Property: Multiple update errors");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(LogEvents.PropertySingleFailure,ex,"Property: Update failed");
+            _logger.LogError(LogEvents.PropertySingleError,ex,"Property: Update error");
         }
     }
 
