@@ -3,9 +3,9 @@
 # being built as an assembly resource
 #
 
-if (Test-Path env:APPLICATION_VERSION) 
+if (Test-Path env:SOLUTION_VERSION) 
 {
-    $Version = "$env:APPLICATION_VERSION"
+    $Version = "$env:SOLUTION_VERSION"
 }
 else 
 {    
