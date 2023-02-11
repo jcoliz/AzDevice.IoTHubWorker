@@ -1,3 +1,5 @@
+// Copyright (C) 2023 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
+
 using System.Device.I2c;
 using System.Text.Json.Serialization;
 using Iot.Device.Shtc3;
