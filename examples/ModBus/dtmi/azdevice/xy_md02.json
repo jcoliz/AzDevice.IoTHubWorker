@@ -1,0 +1,111 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:azdevice:xy_md02;1",
+    "@type": "Interface",
+    "displayName": {
+        "en": "XY-MD02 ModBus Humidity and Temperature Sensor"
+    },
+    "description": "XY-MD02 Temperature and Humidity Transmitter Detection Sensor Module Modbus SHT20 Temperature Sensor RS485 Signal Analog",
+    "contents": [
+        {
+            "@type": [
+                "Telemetry",
+                "Temperature"
+            ],
+            "name": "Temperature",
+            "schema": "double",
+            "displayName": {
+                "en": "Temperature"
+            },
+            "unit": "degreeCelsius"
+        },
+        {
+            "@type": [
+                "Telemetry",
+                "RelativeHumidity"
+            ],
+            "name": "Humidity",
+            "schema": "double",
+            "displayName": {
+                "en": "Humidity"
+            },
+            "unit": "percent"
+        },
+        {
+            "@type": [
+                "Property"
+            ],
+            "name": "Address",
+            "schema": "integer",
+            "displayName": {
+                "en": "ModBus Server Address"
+            },
+            "description": "Location on ModBus where this sensor is to be found",
+            "writable": true
+        },
+        {
+            "@type": [
+                "Property"
+            ],
+            "name": "BaudRate",
+            "schema": "integer",
+            "displayName": {
+                "en": "Serial bus speed"
+            },
+            "description": "Speed of serial bus to be used with this sensor",
+            "writable": true
+        },
+        {
+            "@type": [
+                "Property",
+                "Temperature"
+            ],
+            "name": "TemperatureCorrection",
+            "schema": "double",
+            "displayName": {
+                "en": "Correction value to apply for temperature readings"
+            },
+            "unit": "degreeCelsius",
+            "writable": true
+        },
+        {
+            "@type": [
+                "Property",
+                "RelativeHumidity"
+            ],
+            "name": "HumidityCorrection",
+            "schema": "double",
+            "displayName": {
+                "en": "Correction value to apply for humidity readings"
+            },
+            "unit": "percent",
+            "writable": true
+        },
+        {
+            "@type": [
+                "Property",
+                "Temperature"
+            ],
+            "name": "CurrentTemperature",
+            "schema": "double",
+            "displayName": {
+                "en": "Current Temperature"
+            },
+            "unit": "degreeCelsius",
+            "writable": false
+        },
+        {
+            "@type": [
+                "Property",
+                "RelativeHumidity"
+            ],
+            "name": "CurrentHumidity",
+            "schema": "double",
+            "displayName": {
+                "en": "Current Humidity"
+            },
+            "unit": "percent",
+            "writable": false
+        }
+    ]
+}
