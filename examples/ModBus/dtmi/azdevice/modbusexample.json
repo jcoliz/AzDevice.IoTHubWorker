@@ -1,0 +1,53 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:azdevice:modbusexample;1",
+    "@type": "Interface",
+    "displayName": {
+        "en": "AzDevices Example ModBus Temp/Humidity Controller v1"
+    },
+    "contents": [
+        {
+            "@type": "Property",
+            "displayName": {
+              "en": "Serial Number"
+            },
+            "name": "SerialNumber",
+            "schema": "string",
+            "writable": false
+        },
+        {
+            "@type": "Property",
+            "name": "TelemetryPeriod",
+            "writable": true,
+            "schema": "duration"
+        },
+        {
+            "@type": "Property",
+            "displayName": {
+              "en": "Start time"
+            },
+            "name": "StartTimeUTC",
+            "schema": "dateTime",
+            "writable": false
+        },
+        {
+            "@type": "Property",
+            "displayName": {
+              "en": "Heartbeat"
+            },
+            "name": "HeartbeatUTC",
+            "schema": "dateTime",
+            "writable": false
+        },        
+        {
+            "@type": "Component",
+            "name": "Sensor_1",
+            "schema": "dtmi:azdevice:xy_md02;1"
+        },
+        {
+            "@type": "Component",
+            "name": "Info",
+            "schema": "dtmi:azure:DeviceManagement:DeviceInformation;1"
+        }
+    ]
+}
