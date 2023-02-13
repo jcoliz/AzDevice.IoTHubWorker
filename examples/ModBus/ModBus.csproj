@@ -8,7 +8,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentModbus" Version="5.0.2" />
+    <PackageReference Include="Alexinea.Extensions.Configuration.Toml" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AzDevice.IoTHubWorker\AzDevice.IoTHubWorker.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="version.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="config.toml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="pwsh --command &quot; &amp;&apos;$(ProjectDir)scripts\Update-Version.ps1&apos; &gt; &apos;$(ProjectDir)version.txt&apos; &quot;" />
+  </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Include="version.txt" />  
   </ItemGroup>
 </Project>

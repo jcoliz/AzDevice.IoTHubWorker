@@ -17,6 +17,12 @@
         },
         {
             "@type": "Property",
+            "name": "SerialConnection",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
             "name": "TelemetryPeriod",
             "writable": true,
             "schema": "duration"
@@ -38,7 +44,33 @@
             "name": "HeartbeatUTC",
             "schema": "dateTime",
             "writable": false
-        },        
+        },
+        {
+            "@type": "Command",
+            "name": "GetSerialPortNames",
+            "displayName": "Get Serial Port Names",
+            "description": "This command returns the names of all serial ports connected to this device.",
+            "response": {
+                "name": "Names",
+                "schema": {
+                    "@type": "Array",
+                    "elementSchema": "string"
+                }
+            }
+        },
+        {
+            "@type": "Command",
+            "name": "GetModBus",
+            "displayName": "Get Active ModBus Addresses",
+            "description": "This command returns all the modbus addresses which currently have units attached to them.",
+            "response": {
+                "name": "Addresses",
+                "schema": {
+                    "@type": "Array",
+                    "elementSchema": "integer"
+                }
+            }
+        },
         {
             "@type": "Component",
             "name": "Sensor_1",
