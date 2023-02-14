@@ -43,9 +43,10 @@ public sealed class IoTHubWorker : BackgroundService
     private DeviceRegistrationResult? result;
     private DateTimeOffset NextPropertyUpdateTime = DateTimeOffset.MinValue;
     private TimeSpan PropertyUpdatePeriod = TimeSpan.FromMinutes(1);
-#endregion
+    private readonly TimeSpan TelemetryRetryPeriod = TimeSpan.FromMinutes(1);
+    #endregion
 
-#region Constructor
+    #region Constructor
     public IoTHubWorker(ILogger<IoTHubWorker> logger, IRootModel model, IConfiguration config, IHostEnvironment hostenv, IHostApplicationLifetime lifetime)
     {
         _logger = logger;
@@ -84,7 +85,7 @@ public sealed class IoTHubWorker : BackgroundService
                 if (done)
                     break;
 
-                await Task.Delay(_model.TelemetryPeriod, stoppingToken);
+                await Task.Delay(_model.TelemetryPeriod > TimeSpan.Zero ? _model.TelemetryPeriod : TelemetryRetryPeriod, stoppingToken);
             }
 
             if (iotClient is not null)
@@ -387,7 +388,7 @@ public sealed class IoTHubWorker : BackgroundService
                     _logger.LogWarning(LogEvents.TelemetryNotSent,"Telemetry: No components had available readings. Nothing sent");
             }
             else
-                _logger.LogWarning(LogEvents.TelemetryNoPeriod,"Telemetry: Telemetry period not configured. Nothing sent");
+                _logger.LogWarning(LogEvents.TelemetryNoPeriod,"Telemetry: Telemetry period not configured. Nothing sent. Will try again in {period}",TelemetryRetryPeriod);
         }
         catch (AggregateException ex)
         {
