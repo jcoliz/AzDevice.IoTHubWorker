@@ -97,14 +97,29 @@ public class ModBusExampleModel : IRootModel
             _client = null;
         }
 
-        var config = SerialConnection!.Split(',').Select(x => x.Split('=')).ToDictionary(x => x[0], x => x[1]);
-        
-        _client = new ModbusRtuClient()
-        {
-            BaudRate = Convert.ToInt16(config["baud"]),
-            Parity = Enum.Parse<Parity>(config["parity"]),
-            StopBits = Enum.Parse<StopBits>(config["stop"])
-        };
+        var config = SerialConnection!.Split(';').Select(x => x.Split('=')).ToDictionary(x => x[0], x => x[1]);
+
+        _client = new ModbusRtuClient();
+
+        // Default is 9600
+        if (config.ContainsKey("baud"))
+            _client.BaudRate = Convert.ToInt16(config["baud"]);
+
+        // Default is Even
+        if (config.ContainsKey("parity"))
+            _client.Parity = Enum.Parse<Parity>(config["parity"]);
+
+        // Default is One
+        if (config.ContainsKey("stop"))
+            _client.StopBits = Enum.Parse<StopBits>(config["stop"]);
+
+        // Default is 1000 (milliseconds)
+        if (config.ContainsKey("rto"))
+            _client.ReadTimeout = Convert.ToInt16(config["rto"]);
+
+        // Default is 1000 (milliseconds)
+        if (config.ContainsKey("wto"))
+            _client.WriteTimeout = Convert.ToInt16(config["wto"]);
 
         _client.Connect(config["port"],ModbusEndianness.BigEndian);
 
