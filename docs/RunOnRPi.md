@@ -56,6 +56,13 @@ export PATH=$PATH:/opt/dotnet
 NOTE: If you choose a different installation directory from what's shown here, you'll need to change the 
 DEB package control file before building the DEB package later on in this guide.
 
+The control file for running on ARM64 needs to know where to find dotnet, so this is added to the
+`[Service]` section.
+
+```
+Environment="DOTNET_ROOT=/opt/dotnet"
+```
+
 ### Enable the I<sup>2</sup>C bus
 
 Use the [raspi-config](https://www.raspberrypi.com/documentation/computers/configuration.html) tool

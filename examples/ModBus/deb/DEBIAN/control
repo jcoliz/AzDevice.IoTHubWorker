@@ -1,4 +1,3 @@
 Description: Example ModBus controller
  This is a sample for Azure IoT Device Worker
 Maintainer: James Coliz <jcoliz@outlook.com>
-Depends: dotnet-runtime-7.0

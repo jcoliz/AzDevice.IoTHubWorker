@@ -1,10 +1,10 @@
 [Unit]
 Description=ModBus Example
 
+[Install]
+WantedBy=multi-user.target
+
 [Service]
 Type=notify
 WorkingDirectory=/opt/ModBus
 ExecStart=/opt/ModBus/ModBus
-
-[Install]
-WantedBy=multi-user.target

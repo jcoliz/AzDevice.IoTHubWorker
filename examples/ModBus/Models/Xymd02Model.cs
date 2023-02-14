@@ -18,11 +18,12 @@ public class Xymd02Model :  IComponentModel
     {
         get
         {
-            return ModBusClient?.ReadHoldingRegisters<Int16>(Address, BaudRateRegister, 1)[0] ?? 0;
+            return UartOK ? ModBusClient!.ReadHoldingRegisters<Int16>(Address, BaudRateRegister, 1)[0] : 0;
         }
         set
         {
-            ModBusClient?.WriteSingleRegister(Address,BaudRateRegister,(short)value);
+            if (UartOK)
+                ModBusClient!.WriteSingleRegister(Address,BaudRateRegister,(short)value);
         }
     }
 
@@ -30,11 +31,12 @@ public class Xymd02Model :  IComponentModel
     {
         get
         {
-            return ModBusClient?.ReadHoldingRegisters<Int16>(Address,TemperatureCorrectionRegister,1)[0] ?? 0 / 10.0;
+            return UartOK ? ModBusClient!.ReadHoldingRegisters<Int16>(Address,TemperatureCorrectionRegister,1)[0] / 10.0 : 0;
         }
         set
         {
-            ModBusClient?.WriteSingleRegister(Address,TemperatureCorrectionRegister,(short)(value*10.0));
+            if (UartOK)
+                ModBusClient!.WriteSingleRegister(Address,TemperatureCorrectionRegister,(short)(value*10.0));
         }
     }
 
@@ -42,11 +44,12 @@ public class Xymd02Model :  IComponentModel
     {
         get
         {
-            return ModBusClient?.ReadHoldingRegisters<Int16>(Address,HumidityCorrectionRegister,1)[0] ?? 0 / 10.0;
+            return UartOK ? ModBusClient!.ReadHoldingRegisters<Int16>(Address,HumidityCorrectionRegister,1)[0] / 10.0 : 0;
         }
         set
         {
-            ModBusClient?.WriteSingleRegister(Address,HumidityCorrectionRegister,(short)(value*10.0));
+            if (UartOK)
+                ModBusClient!.WriteSingleRegister(Address,HumidityCorrectionRegister,(short)(value*10.0));
         }
     }
 
@@ -97,6 +100,8 @@ public class Xymd02Model :  IComponentModel
     #region Internals
     [JsonIgnore]
     public ModbusRtuClient? ModBusClient { get; set; }
+
+    private bool UartOK => ModBusClient is not null && Address > 0;
     #endregion
 
     #region IComponentModel
