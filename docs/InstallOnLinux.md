@@ -10,7 +10,7 @@ Check out [Worker Services in .NET](https://learn.microsoft.com/en-us/dotnet/cor
 
 ## Configure Host Service for SystemD
 
-You'll need to add `UseSystemd' to your host builder. This service allows the app and systemd to communicate seamlessly.
+You'll need to add `UseSystemd` to your host builder. This service allows the app and systemd to communicate seamlessly.
 The app will properly notify systemd when it's running or stopping, as well as map the log levels in a way systemd
 can understand them. All good stuff!
 
@@ -24,10 +24,9 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddHostedService<IoTHubWorker>();
         services.AddSingleton<IRootModel>(new ControllerModel());
     })
-    .ConfigureHostConfiguration(config =>
+    .ConfigureAppConfiguration(config =>
     {
         config.AddTomlFile("config.toml", optional: true, reloadOnChange: true);
-        config.AddJsonFile("version.json", optional: true, reloadOnChange: true);
     })
     .Build();
 ```

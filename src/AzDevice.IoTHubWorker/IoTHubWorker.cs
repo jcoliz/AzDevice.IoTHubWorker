@@ -604,8 +604,6 @@ public sealed class IoTHubWorker : BackgroundService
         {
             _logger.LogError(LogEvents.PropertyReportSingleError,ex,"Property: Reporting error");
         }
-
-
     }
     #endregion
 }
