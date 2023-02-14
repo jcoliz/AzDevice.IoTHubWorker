@@ -177,6 +177,10 @@ public class Xymd02Model :  IComponentModel
         {
             var address = Convert.ToInt16(jsonparams);
             SetAddress(address);
+
+            // TODO: Somehow, I need to force a property update for address, because we need
+            // to let the twin know where to look for it next time around.
+
             return Task.FromResult<object>(new());
         }
 

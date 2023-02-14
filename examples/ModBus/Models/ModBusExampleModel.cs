@@ -38,6 +38,11 @@ public class ModBusExampleModel : IRootModel
     #endregion
 
     #region Commands
+    private string[] GetSerialPortNames()
+    {
+        return SerialPort.GetPortNames();
+    }
+
     #endregion
 
     #region Fields
@@ -185,6 +190,10 @@ public class ModBusExampleModel : IRootModel
     /// <returns>Unserialized result of the action, or new() for empty result</returns>
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
+        if (name == "GetSerialPortNames")
+        {
+            return Task.FromResult<object>(GetSerialPortNames());
+        }
         throw new NotImplementedException($"Command {name} is not implemented on {dtmi}");
     }
 

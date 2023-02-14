@@ -1,0 +1,272 @@
+[
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:azdevice:modbusexample;1",
+    "@type": "Interface",
+    "displayName": {
+      "en": "AzDevices Example ModBus Temp/Humidity Controller v1"
+    },
+    "contents": [
+      {
+        "@type": "Property",
+        "displayName": {
+          "en": "Serial Number"
+        },
+        "name": "SerialNumber",
+        "schema": "string",
+        "writable": false
+      },
+      {
+        "@type": "Property",
+        "name": "SerialConnection",
+        "writable": true,
+        "schema": "string"
+      },
+      {
+        "@type": "Property",
+        "name": "TelemetryPeriod",
+        "writable": true,
+        "schema": "duration"
+      },
+      {
+        "@type": "Property",
+        "displayName": {
+          "en": "Start time"
+        },
+        "name": "StartTimeUTC",
+        "schema": "dateTime",
+        "writable": false
+      },
+      {
+        "@type": "Property",
+        "displayName": {
+          "en": "Heartbeat"
+        },
+        "name": "HeartbeatUTC",
+        "schema": "dateTime",
+        "writable": false
+      },
+      {
+        "@type": "Command",
+        "name": "GetSerialPortNames",
+        "displayName": "Get Serial Port Names",
+        "description": "This command returns the names of all serial ports connected to this device.",
+        "response": {
+          "name": "Names",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "string"
+          }
+        }
+      },
+      {
+        "@type": "Command",
+        "name": "GetModBus",
+        "displayName": "Get Active ModBus Addresses",
+        "description": "This command returns all the modbus addresses which currently have units attached to them.",
+        "response": {
+          "name": "Addresses",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "integer"
+          }
+        }
+      },
+      {
+        "@type": "Component",
+        "name": "Sensor_1",
+        "schema": "dtmi:azdevice:xy_md02;1"
+      },
+      {
+        "@type": "Component",
+        "name": "Info",
+        "schema": "dtmi:azure:DeviceManagement:DeviceInformation;1"
+      }
+    ]
+  },
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:azdevice:xy_md02;1",
+    "@type": "Interface",
+    "displayName": {
+      "en": "XY-MD02 ModBus Humidity and Temperature Sensor"
+    },
+    "description": "XY-MD02 Temperature and Humidity Transmitter Detection Sensor Module Modbus SHT20 Temperature Sensor RS485 Signal Analog",
+    "contents": [
+      {
+        "@type": [
+          "Telemetry",
+          "Temperature"
+        ],
+        "name": "Temperature",
+        "schema": "double",
+        "displayName": {
+          "en": "Temperature"
+        },
+        "unit": "degreeCelsius"
+      },
+      {
+        "@type": [
+          "Telemetry",
+          "RelativeHumidity"
+        ],
+        "name": "Humidity",
+        "schema": "double",
+        "displayName": {
+          "en": "Humidity"
+        },
+        "unit": "percent"
+      },
+      {
+        "@type": [
+          "Property"
+        ],
+        "name": "Address",
+        "schema": "integer",
+        "displayName": {
+          "en": "ModBus Server Address"
+        },
+        "description": "Location on ModBus where this sensor is to be found",
+        "writable": false
+      },
+      {
+        "@type": [
+          "Property"
+        ],
+        "name": "BaudRate",
+        "schema": "integer",
+        "displayName": {
+          "en": "Serial bus speed"
+        },
+        "description": "Speed of serial bus to be used with this sensor",
+        "writable": true
+      },
+      {
+        "@type": [
+          "Property",
+          "Temperature"
+        ],
+        "name": "TemperatureCorrection",
+        "schema": "double",
+        "displayName": {
+          "en": "Correction value to apply for temperature readings"
+        },
+        "unit": "degreeCelsius",
+        "writable": true
+      },
+      {
+        "@type": [
+          "Property",
+          "RelativeHumidity"
+        ],
+        "name": "HumidityCorrection",
+        "schema": "double",
+        "displayName": {
+          "en": "Correction value to apply for humidity readings"
+        },
+        "unit": "percent",
+        "writable": true
+      },
+      {
+        "@type": [
+          "Property",
+          "Temperature"
+        ],
+        "name": "CurrentTemperature",
+        "schema": "double",
+        "displayName": {
+          "en": "Current Temperature"
+        },
+        "unit": "degreeCelsius",
+        "writable": false
+      },
+      {
+        "@type": [
+          "Property",
+          "RelativeHumidity"
+        ],
+        "name": "CurrentHumidity",
+        "schema": "double",
+        "displayName": {
+          "en": "Current Humidity"
+        },
+        "unit": "percent",
+        "writable": false
+      },
+      {
+        "@type": "Command",
+        "name": "SetAddress",
+        "displayName": "Set New ModBus Address",
+        "description": "Move this sensor to a new address on ModBus.",
+        "request": {
+          "name": "Address",
+          "schema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:azure:DeviceManagement:DeviceInformation;1",
+    "@type": "Interface",
+    "displayName": "Device Information",
+    "contents": [
+      {
+        "@type": "Property",
+        "name": "manufacturer",
+        "displayName": "Manufacturer",
+        "schema": "string",
+        "description": "Company name of the device manufacturer. This could be the same as the name of the original equipment manufacturer (OEM). Ex. Contoso."
+      },
+      {
+        "@type": "Property",
+        "name": "model",
+        "displayName": "Device model",
+        "schema": "string",
+        "description": "Device model name or ID. Ex. Surface Book 2."
+      },
+      {
+        "@type": "Property",
+        "name": "swVersion",
+        "displayName": "Software version",
+        "schema": "string",
+        "description": "Version of the software on your device. This could be the version of your firmware. Ex. 1.3.45"
+      },
+      {
+        "@type": "Property",
+        "name": "osName",
+        "displayName": "Operating system name",
+        "schema": "string",
+        "description": "Name of the operating system on the device. Ex. Windows 10 IoT Core."
+      },
+      {
+        "@type": "Property",
+        "name": "processorArchitecture",
+        "displayName": "Processor architecture",
+        "schema": "string",
+        "description": "Architecture of the processor on the device. Ex. x64 or ARM."
+      },
+      {
+        "@type": "Property",
+        "name": "processorManufacturer",
+        "displayName": "Processor manufacturer",
+        "schema": "string",
+        "description": "Name of the manufacturer of the processor on the device. Ex. Intel."
+      },
+      {
+        "@type": "Property",
+        "name": "totalStorage",
+        "displayName": "Total storage",
+        "schema": "double",
+        "description": "Total available storage on the device in kilobytes. Ex. 2048000 kilobytes."
+      },
+      {
+        "@type": "Property",
+        "name": "totalMemory",
+        "displayName": "Total memory",
+        "schema": "double",
+        "description": "Total available memory on the device in kilobytes. Ex. 256000 kilobytes."
+      }
+    ]
+  }
+]
