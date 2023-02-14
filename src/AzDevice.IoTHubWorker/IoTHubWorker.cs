@@ -33,6 +33,7 @@ public sealed class IoTHubWorker : BackgroundService
     private readonly ILogger<IoTHubWorker> _logger;
     private readonly IConfiguration _config;
     private readonly IHostEnvironment _hostenv;
+    private readonly IHostApplicationLifetime _lifetime;
 
     #endregion
 
@@ -45,12 +46,13 @@ public sealed class IoTHubWorker : BackgroundService
 #endregion
 
 #region Constructor
-    public IoTHubWorker(ILogger<IoTHubWorker> logger, IRootModel model, IConfiguration config, IHostEnvironment hostenv)
+    public IoTHubWorker(ILogger<IoTHubWorker> logger, IRootModel model, IConfiguration config, IHostEnvironment hostenv, IHostApplicationLifetime lifetime)
     {
         _logger = logger;
         _model = model;
         _config = config;
         _hostenv = hostenv;
+        _lifetime = lifetime;
     }
 #endregion
 
@@ -63,6 +65,8 @@ public sealed class IoTHubWorker : BackgroundService
     {
         try
         {
+            var done = _config["run"] == "once";
+
             _logger.LogInformation(LogEvents.ExecuteStartOK,"Started OK");
 
             await LoadInitialState();
@@ -76,6 +80,10 @@ public sealed class IoTHubWorker : BackgroundService
             {
                 await SendTelemetry();
                 await UpdateReportedProperties();
+
+                if (done)
+                    break;
+
                 await Task.Delay(_model.TelemetryPeriod, stoppingToken);
             }
 
@@ -90,6 +98,9 @@ public sealed class IoTHubWorker : BackgroundService
         {
             _logger.LogCritical(LogEvents.ExecuteFailed,"IoTHub Device Worker: Failed {type} {message}", ex.GetType().Name, ex.Message);
         }
+
+        await Task.Delay(500);
+        _lifetime.StopApplication();
     }
 #endregion
 
