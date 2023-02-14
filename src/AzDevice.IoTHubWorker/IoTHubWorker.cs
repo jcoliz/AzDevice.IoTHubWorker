@@ -512,12 +512,12 @@ public sealed class IoTHubWorker : BackgroundService
         {
             foreach (Exception exception in ex.InnerExceptions)
             {
-                _logger.LogError(LogEvents.PropertyMultipleErrors, exception, "Property: Multiple update errors");
+                _logger.LogError(LogEvents.PropertyUpdateMultipleErrors, exception, "Property: Multiple update errors");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(LogEvents.PropertySingleError,ex,"Property: Update error");
+            _logger.LogError(LogEvents.PropertyUpdateSingleError,ex,"Property: Update error");
         }
     }
 
@@ -561,35 +561,51 @@ public sealed class IoTHubWorker : BackgroundService
     /// </summary>
     private async Task UpdateReportedProperties()
     {
-        if (DateTimeOffset.Now < NextPropertyUpdateTime)
-            return;
+        try
+        {
+            if (DateTimeOffset.Now < NextPropertyUpdateTime)
+                return;
 
-        // Create dictionary of root properties
-        var root = _model.GetProperties();
-        var j1 = JsonSerializer.Serialize(root);
-        var d1 = JsonSerializer.Deserialize<Dictionary<string, object>>(j1);
+            // Create dictionary of root properties
+            var root = _model.GetProperties();
+            var j1 = JsonSerializer.Serialize(root);
+            var d1 = JsonSerializer.Deserialize<Dictionary<string, object>>(j1);
 
-        // Create dictionary of components with their properties
-        var d2 = _model.Components.ToDictionary(x => x.Key, x => x.Value.GetProperties());
+            // Create dictionary of components with their properties
+            var d2 = _model.Components.ToDictionary(x => x.Key, x => x.Value.GetProperties());
 
-        // Merge them
-        var d3 = new[] { d1, d2 }; 
-        var update = d3.SelectMany(x => x!).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            // Merge them
+            var d3 = new[] { d1, d2 }; 
+            var update = d3.SelectMany(x => x!).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        // Convert to json and send them
-        var json = JsonSerializer.Serialize(update);
-        var resulttc = new TwinCollection(json);
-        await iotClient!.UpdateReportedPropertiesAsync(resulttc);
+            // Convert to json and send them
+            var json = JsonSerializer.Serialize(update);
+            var resulttc = new TwinCollection(json);
+            await iotClient!.UpdateReportedPropertiesAsync(resulttc);
 
-        _logger.LogInformation(LogEvents.PropertyReportedOK,"Property: OK Reported {count} properties",update.Count);
-        _logger.LogDebug(LogEvents.PropertyReportedDetail,"Property: Reported details {detail}. Next update after {delay}",json,PropertyUpdatePeriod);
+            _logger.LogInformation(LogEvents.PropertyReportedOK,"Property: OK Reported {count} properties",update.Count);
+            _logger.LogDebug(LogEvents.PropertyReportedDetail,"Property: Reported details {detail}. Next update after {delay}",json,PropertyUpdatePeriod);
 
-        // Manage back-off of property updates
-        NextPropertyUpdateTime = DateTimeOffset.Now + PropertyUpdatePeriod;
-        PropertyUpdatePeriod += PropertyUpdatePeriod;
-        TimeSpan oneday = TimeSpan.FromDays(1);
-        if (PropertyUpdatePeriod > oneday)
-            PropertyUpdatePeriod = oneday;
+            // Manage back-off of property updates
+            NextPropertyUpdateTime = DateTimeOffset.Now + PropertyUpdatePeriod;
+            PropertyUpdatePeriod += PropertyUpdatePeriod;
+            TimeSpan oneday = TimeSpan.FromDays(1);
+            if (PropertyUpdatePeriod > oneday)
+                PropertyUpdatePeriod = oneday;
+        }
+        catch (AggregateException ex)
+        {
+            foreach (Exception exception in ex.InnerExceptions)
+            {
+                _logger.LogError(LogEvents.PropertyReportMultipleErrors, exception, "Property: Multiple reporting errors");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(LogEvents.PropertyReportSingleError,ex,"Property: Reporting error");
+        }
+
+
     }
     #endregion
 }
