@@ -8,9 +8,9 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         services.AddHostedService<IoTHubWorker>();
-        services.AddSingleton<IRootModel>(new ControllerModel());
+        services.AddSingleton<IRootModel,ControllerModel>();
     })
-    .ConfigureHostConfiguration(config =>
+    .ConfigureAppConfiguration(config =>
     {
         config.AddTomlFile("config.toml", optional: true, reloadOnChange: true);
     })

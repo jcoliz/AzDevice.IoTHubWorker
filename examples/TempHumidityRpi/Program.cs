@@ -8,9 +8,9 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         services.AddHostedService<IoTHubWorker>();
-        services.AddSingleton<IRootModel>(new TempHumidityModel());
+        services.AddSingleton<IRootModel,TempHumidityModel>();
     })
-    .ConfigureHostConfiguration(config =>
+    .ConfigureAppConfiguration(config =>
     {
         config.AddTomlFile("config.toml", optional: true, reloadOnChange: true);
     })

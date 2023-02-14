@@ -8,7 +8,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         services.AddHostedService<IoTHubWorker>();
-        services.AddSingleton<IRootModel>(new ModBusExampleModel());
+        services.AddSingleton<IRootModel,ModBusExampleModel>();
     })
     .ConfigureAppConfiguration(config =>
     {
