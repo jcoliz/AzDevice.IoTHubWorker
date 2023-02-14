@@ -56,7 +56,7 @@ public class ModBusExampleModel : IRootModel
     /// <returns>String to identify the current device</returns>
     public override string ToString()
     {
-        return $"S/N:{SerialNumber} ver:{DeviceInformation.SoftwareVersion} sensor:{Sensor} uart:{SerialConnection}";
+        return $"S/N:{SerialNumber ?? "null"} ver:{DeviceInformation.SoftwareVersion} sensor:{Sensor} uart:{SerialConnection ?? "null"}";
     }
     #endregion
 
@@ -177,8 +177,12 @@ public class ModBusExampleModel : IRootModel
 
         if (values.ContainsKey("SerialConnection"))
         {
-            SerialConnection = values["SerialConnection"];
-            ConnectSerial();
+            var value = values["SerialConnection"];
+            if (value.Contains("port="))
+            {
+                SerialConnection = values["SerialConnection"];
+                ConnectSerial();
+            }
         }
     }
 

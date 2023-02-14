@@ -18,11 +18,11 @@ public class Xymd02Model :  IComponentModel
     {
         get
         {
-            return ModBusClient!.ReadHoldingRegisters<Int16>(Address,BaudRateRegister,1)[0];
+            return ModBusClient?.ReadHoldingRegisters<Int16>(Address, BaudRateRegister, 1)[0] ?? 0;
         }
         set
         {
-            ModBusClient!.WriteSingleRegister(Address,BaudRateRegister,(short)value);
+            ModBusClient?.WriteSingleRegister(Address,BaudRateRegister,(short)value);
         }
     }
 
@@ -30,11 +30,11 @@ public class Xymd02Model :  IComponentModel
     {
         get
         {
-            return ModBusClient!.ReadHoldingRegisters<Int16>(Address,TemperatureCorrectionRegister,1)[0] / 10.0;
+            return ModBusClient?.ReadHoldingRegisters<Int16>(Address,TemperatureCorrectionRegister,1)[0] ?? 0 / 10.0;
         }
         set
         {
-            ModBusClient!.WriteSingleRegister(Address,TemperatureCorrectionRegister,(short)(value*10.0));
+            ModBusClient?.WriteSingleRegister(Address,TemperatureCorrectionRegister,(short)(value*10.0));
         }
     }
 
@@ -42,11 +42,11 @@ public class Xymd02Model :  IComponentModel
     {
         get
         {
-            return ModBusClient!.ReadHoldingRegisters<Int16>(Address,HumidityCorrectionRegister,1)[0] / 10.0;
+            return ModBusClient?.ReadHoldingRegisters<Int16>(Address,HumidityCorrectionRegister,1)[0] ?? 0 / 10.0;
         }
         set
         {
-            ModBusClient!.WriteSingleRegister(Address,HumidityCorrectionRegister,(short)(value*10.0));
+            ModBusClient?.WriteSingleRegister(Address,HumidityCorrectionRegister,(short)(value*10.0));
         }
     }
 
@@ -113,6 +113,9 @@ public class Xymd02Model :  IComponentModel
     /// <returns>All telemetry we wish to send at this time, or null for don't send any</returns>
     object? IComponentModel.GetTelemetry()
     {
+        if (ModBusClient is null || Address == 0)
+            return null;
+
         // Read input registers
         var inputs = ModBusClient!.ReadInputRegisters<Int16>(Address,TemperatureRegister,2).ToArray();
 
