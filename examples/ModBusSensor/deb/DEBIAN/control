@@ -1,3 +1,3 @@
-Description: Example ModBus controller
+Description: Example ModBus sensor controller
  This is a sample for Azure IoT Device Worker
 Maintainer: James Coliz <jcoliz@outlook.com>
