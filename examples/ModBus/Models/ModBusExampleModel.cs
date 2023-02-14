@@ -56,7 +56,7 @@ public class ModBusExampleModel : IRootModel
     /// <returns>String to identify the current device</returns>
     public override string ToString()
     {
-        return $"S/N:{SerialNumber} ver:{DeviceInformation.SoftwareVersion} port:{SerialConnection} sensor:{Sensor}";
+        return $"S/N:{SerialNumber} ver:{DeviceInformation.SoftwareVersion} sensor:{Sensor} uart:{SerialConnection}";
     }
     #endregion
 
@@ -97,16 +97,16 @@ public class ModBusExampleModel : IRootModel
             _client = null;
         }
 
-        var split = SerialConnection!.Split(',');
-
+        var config = SerialConnection!.Split(',').Select(x => x.Split('=')).ToDictionary(x => x[0], x => x[1]);
+        
         _client = new ModbusRtuClient()
         {
-            BaudRate = Convert.ToInt16(split[1]),
-            Parity = Enum.Parse<Parity>(split[2]),
-            StopBits = Enum.Parse<StopBits>(split[3])
+            BaudRate = Convert.ToInt16(config["baud"]),
+            Parity = Enum.Parse<Parity>(config["parity"]),
+            StopBits = Enum.Parse<StopBits>(config["stop"])
         };
 
-        _client.Connect(split[0],ModbusEndianness.BigEndian);
+        _client.Connect(config["port"],ModbusEndianness.BigEndian);
 
         Sensor.ModBusClient = _client;
     }
