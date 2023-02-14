@@ -41,7 +41,7 @@
                 "en": "ModBus Server Address"
             },
             "description": "Location on ModBus where this sensor is to be found",
-            "writable": true
+            "writable": false
         },
         {
             "@type": [
@@ -106,6 +106,16 @@
             },
             "unit": "percent",
             "writable": false
+        },
+        {
+            "@type": "Command",
+            "name": "SetAddress",
+            "displayName": "Set New ModBus Address",
+            "description": "Move this sensor to a new address on ModBus.",
+            "request": {
+                "name": "Address",
+                "schema": "integer"
+            }
         }
     ]
 }

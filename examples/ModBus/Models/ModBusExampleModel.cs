@@ -102,6 +102,8 @@ public class ModBusExampleModel : IRootModel
         };
 
         _client.Connect(split[0],ModbusEndianness.BigEndian);
+
+        Sensor.ModBusClient = _client;
     }
     #endregion
 

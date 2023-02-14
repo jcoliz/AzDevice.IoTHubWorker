@@ -1,6 +1,7 @@
 // Copyright (C) 2023 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
 
 using AzDevice.Models;
+using FluentModbus;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -11,47 +12,75 @@ public class Xymd02Model :  IComponentModel
     [JsonPropertyName("__t")]
     public string ComponentID => "c";
 
-    public int Address { get; set; }
+    public int Address { get; private set; }
+
+    public int BaudRate
+    {
+        get
+        {
+            return ModBusClient!.ReadHoldingRegisters<Int16>(Address,BaudRateRegister,1)[0];
+        }
+        set
+        {
+            ModBusClient!.WriteSingleRegister(Address,BaudRateRegister,(short)value);
+        }
+    }
+
+    public double TemperatureCorrection
+    {
+        get
+        {
+            return ModBusClient!.ReadHoldingRegisters<Int16>(Address,TemperatureCorrectionRegister,1)[0] / 10.0;
+        }
+        set
+        {
+            ModBusClient!.WriteSingleRegister(Address,TemperatureCorrectionRegister,(short)(value*10.0));
+        }
+    }
+
+    public double HumidityCorrection
+    {
+        get
+        {
+            return ModBusClient!.ReadHoldingRegisters<Int16>(Address,HumidityCorrectionRegister,1)[0] / 10.0;
+        }
+        set
+        {
+            ModBusClient!.WriteSingleRegister(Address,HumidityCorrectionRegister,(short)(value*10.0));
+        }
+    }
 
     public double CurrentTemperature { get; private set; }
 
     public double CurrentHumidity { get; private set; }
 
-    public double TemperatureCorrection { get; set; }
+    #endregion
 
-    public double HumidityCorrection { get; set; }
-
-    public int BaudRate { get; set; }
-
+    #region ModBus Registers
+    const int TemperatureRegister = 1;
+    const int HumidityRegister = 2;
+    const int AddressRegister = 0x101;
+    const int BaudRateRegister = 0x102;
+    const int TemperatureCorrectionRegister = 0x103;
+    const int HumidityCorrectionRegister = 0x104;
     #endregion
 
     #region Telemetry
 
-    /// <summary>
-    /// Generates simulated telemetry in case we don't have an actual sensor
-    /// attached.
-    /// </summary>
-    /// <remarks>
-    /// Whether or not we are running with a real sensor is a runtime decision
-    /// based on "Initial State" configuration.
-    /// </remarks>
-    public class SimulatedTelemetry
+    public class Telemetry
     {
-        public SimulatedTelemetry()
-        {
-            var dt = DateTimeOffset.UtcNow;
-            Temperature = dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0;            
-            Humidity = (dt.Hour * 100.0 + dt.Minute + dt.Second / 100.0) / 2400.0;
-        }
+        public double Temperature { get; set; }
 
-        public double Temperature { get; private set; }
-
-        public double Humidity { get; private set; }
+        public double Humidity { get; set; }
     }
 
     #endregion
 
     #region Commands
+    private void SetAddress(int address)
+    {
+        ModBusClient!.WriteSingleRegister(Address,AddressRegister,(short)address);
+    }
     #endregion
 
     #region Log Identity
@@ -61,11 +90,13 @@ public class Xymd02Model :  IComponentModel
     /// <returns>String to identify the current device</returns>
     public override string ToString()
     {
-        return "XY-MD02";
+        return $"XY-MD02@{Address}";
     }
     #endregion
 
-    #region Fields
+    #region Internals
+    [JsonIgnore]
+    public ModbusRtuClient? ModBusClient { get; set; }
     #endregion
 
     #region IComponentModel
@@ -82,8 +113,13 @@ public class Xymd02Model :  IComponentModel
     /// <returns>All telemetry we wish to send at this time, or null for don't send any</returns>
     object? IComponentModel.GetTelemetry()
     {
-        // Take the reading
-        var reading = new SimulatedTelemetry();
+        // Read input registers
+        var inputs = ModBusClient!.ReadInputRegisters<Int16>(Address,TemperatureRegister,2).ToArray();
+
+        // Save those as telemetry
+        var reading = new Telemetry();
+        reading.Temperature = (double)inputs[0] / 10.0;
+        reading.Humidity = (double)inputs[1] / 10.0;
 
         // Update the properties which track the current values
         CurrentHumidity = reading.Humidity;
@@ -126,7 +162,7 @@ public class Xymd02Model :  IComponentModel
     void IComponentModel.SetInitialState(IDictionary<string, string> values)
     {
         if (values.ContainsKey("Address"))
-            TemperatureCorrection = Convert.ToInt16(values["Address"]);
+            Address = Convert.ToInt16(values["Address"]);
     }
 
     /// <summary>
@@ -137,6 +173,13 @@ public class Xymd02Model :  IComponentModel
     /// <returns>Unserialized result of the action, or new() for empty result</returns>
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
+        if (name == "SetAddress")
+        {
+            var address = Convert.ToInt16(jsonparams);
+            SetAddress(address);
+            return Task.FromResult<object>(new());
+        }
+
         throw new NotImplementedException($"Command {name} is not implemented on {dtmi}");
     }
  

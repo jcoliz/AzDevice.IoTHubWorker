@@ -10,7 +10,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddHostedService<IoTHubWorker>();
         services.AddSingleton<IRootModel>(new ModBusExampleModel());
     })
-    .ConfigureHostConfiguration(config =>
+    .ConfigureAppConfiguration(config =>
     {
         config.AddTomlFile("config.toml", optional: true, reloadOnChange: true);
     })
