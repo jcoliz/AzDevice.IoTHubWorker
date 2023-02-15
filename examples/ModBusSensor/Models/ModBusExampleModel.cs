@@ -60,6 +60,14 @@ public class ModBusExampleModel : IRootModel
     }
     #endregion
 
+    #region Constructor
+    public ModBusExampleModel(ILogger<ModBusExampleModel> logger)
+    {
+        _logger = logger;
+    }
+    private readonly ILogger<ModBusExampleModel> _logger;
+    #endregion
+
     #region IRootModel
 
     /// <summary>
@@ -90,40 +98,51 @@ public class ModBusExampleModel : IRootModel
 
     private void ConnectSerial()
     {
-        if (_client != null)
+        try
         {
-            _client.Close();
-            _client.Dispose();
-            _client = null;
+            if (_client != null)
+            {
+                _client.Close();
+                _client.Dispose();
+                _client = null;
+            }
+
+            var config = SerialConnection!.Split(';').Select(x => x.Split('=')).ToDictionary(x => x[0], x => x[1]);
+
+            _client = new ModbusRtuClient();
+
+            // Default is 9600
+            if (config.ContainsKey("baud"))
+                _client.BaudRate = Convert.ToInt16(config["baud"]);
+
+            // Default is Even
+            if (config.ContainsKey("parity"))
+                _client.Parity = Enum.Parse<Parity>(config["parity"]);
+
+            // Default is One
+            if (config.ContainsKey("stop"))
+                _client.StopBits = Enum.Parse<StopBits>(config["stop"]);
+
+            // Default is 1000 (milliseconds)
+            if (config.ContainsKey("rto"))
+                _client.ReadTimeout = Convert.ToInt16(config["rto"]);
+
+            // Default is 1000 (milliseconds)
+            if (config.ContainsKey("wto"))
+                _client.WriteTimeout = Convert.ToInt16(config["wto"]);
+
+            _client.Connect(config["port"],ModbusEndianness.BigEndian);
+
+            Sensor.ModBusClient = _client;
         }
-
-        var config = SerialConnection!.Split(';').Select(x => x.Split('=')).ToDictionary(x => x[0], x => x[1]);
-
-        _client = new ModbusRtuClient();
-
-        // Default is 9600
-        if (config.ContainsKey("baud"))
-            _client.BaudRate = Convert.ToInt16(config["baud"]);
-
-        // Default is Even
-        if (config.ContainsKey("parity"))
-            _client.Parity = Enum.Parse<Parity>(config["parity"]);
-
-        // Default is One
-        if (config.ContainsKey("stop"))
-            _client.StopBits = Enum.Parse<StopBits>(config["stop"]);
-
-        // Default is 1000 (milliseconds)
-        if (config.ContainsKey("rto"))
-            _client.ReadTimeout = Convert.ToInt16(config["rto"]);
-
-        // Default is 1000 (milliseconds)
-        if (config.ContainsKey("wto"))
-            _client.WriteTimeout = Convert.ToInt16(config["wto"]);
-
-        _client.Connect(config["port"],ModbusEndianness.BigEndian);
-
-        Sensor.ModBusClient = _client;
+        catch (Exception ex)
+        {
+            var available = string.Join(',',GetSerialPortNames());
+            if (string.IsNullOrEmpty(available))
+                available = "NONE";
+            var appex = new ApplicationException($"Unable to open {SerialConnection}. Available ports: {available}");
+            throw new AggregateException(new [] { appex, ex });
+        }
     }
     #endregion
 
@@ -197,6 +216,13 @@ public class ModBusExampleModel : IRootModel
             {
                 SerialConnection = values["SerialConnection"];
                 ConnectSerial();
+            }
+            else
+            {
+                var available = string.Join(',',GetSerialPortNames());
+                if (string.IsNullOrEmpty(available))
+                    available = "NONE";
+                _logger.LogWarning(1071,"Uart Initial State: `{uart}` is invalid. Available ports: {ports}. Set desired SerialConnection property with correct configuration.",value,available);
             }
         }
     }
