@@ -14,7 +14,6 @@ public class ModbusClient : IModbusClient
     private readonly IOptions<ModbusClientOptions> _options;
     private readonly ILogger<ModbusClient> _logger;
     private readonly ModbusRtuClient _client;
-    private bool connected = false;
 
     public ModbusClient(IOptions<ModbusClientOptions> options, ILogger<ModbusClient> logger)
     {
@@ -23,9 +22,11 @@ public class ModbusClient : IModbusClient
         _client = new ModbusRtuClient();
     }
 
+    public bool IsConnected { get; private set; } = false;
+
     public void Connect()
     {
-        if (connected)
+        if (IsConnected)
             return;
 
         _logger.LogDebug(ModbusLogEvents.ModbusCreating, "Creating with options {options}", _options.Value);
@@ -49,7 +50,7 @@ public class ModbusClient : IModbusClient
         // TODO: Allow config of write timeout
 
         _client.Connect(_options.Value.Port!,ModbusEndianness.BigEndian);
-        connected = true;
+        IsConnected = true;
 
         _logger.LogInformation(ModbusLogEvents.ModbusCreateOK, "Created OK");
     }

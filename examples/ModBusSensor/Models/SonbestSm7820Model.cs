@@ -149,6 +149,8 @@ public class SonbestSm7820Model :  IComponentModel
     public SonbestSm7820Model(IModbusClient client)
     {
         _client = client;
+
+        ThreadPool.QueueUserWorkItem<SonbestSm7820Model>(BackgroundWork, this, preferLocal: true);
     }
     #endregion
 
@@ -179,6 +181,8 @@ public class SonbestSm7820Model :  IComponentModel
     /// </remarks>
     private short[]? ConfigRegisterCache;
 
+    private short[]? InputRegisterCache;
+
     /// <summary>
     /// Queue of write operations
     /// </summary>
@@ -189,7 +193,91 @@ public class SonbestSm7820Model :  IComponentModel
     /// </remarks>
     private readonly ConcurrentQueue<(int,short)> RegisterWriteQueue = new ConcurrentQueue<(int,short)>();
 
-    private bool UartOK => Address > 0;
+    private bool UartOK => _client.IsConnected && Address > 0;
+    #endregion
+
+    #region Background Work
+    /// <summary>
+    /// Runs all work with modbus in the backgound
+    /// </summary>
+    /// <remarks>
+    /// Necessary for this sensor to control timing
+    /// </remarks>
+    /// <param name="state"></param>
+    static void BackgroundWork(SonbestSm7820Model state)
+    {
+        while(true)
+        {
+            try
+            {
+                if (state.UartOK)
+                {
+                    // First order of business is to read the holding registers, if we don't already have them
+                    if(state.ConfigRegisterCache is null)
+                    {
+                        try
+                        {
+                            state.ConfigRegisterCache = state._client.ReadHoldingRegisters<Int16>(state.Address, FirstConfigRegister, AfterLastConfigRegister - FirstConfigRegister).ToArray();
+                        }
+                        catch
+                        {
+                            state.ConfigRegisterCache = null;
+                        }
+                    }
+                    // Next, process one holding register write
+                    else if (! state.RegisterWriteQueue.IsEmpty )
+                    {
+                        // Peek the top item
+                        if (state.RegisterWriteQueue.TryPeek(out var top))
+                        {
+                            // Decompose tuple
+                            var (register, value) = top;
+
+                            // Don't write the value through to the sensor IF it already has that value!
+                            if (state.ConfigRegisterCache[register-FirstConfigRegister] != value) 
+                            {
+                                // Write out the desired value
+                                state._client.WriteSingleRegister(state.Address, register, value);
+
+                                // Update the cache, in case we report properties soon
+                                state.ConfigRegisterCache[register - FirstConfigRegister] = value;
+
+                                // If we have updated the address register, need to change our OWN
+                                // view on where to look for this device.
+                                // WARNING: The only way to make this change be remembered for next
+                                // time is to change the initial state config.
+                                if (register == AddressRegister)
+                                    state.Address = value;
+                            }
+
+                            // Note that we don't DEQUEUE it until it's successfully been applied without error
+                            state.RegisterWriteQueue.TryDequeue(out _);
+                        }
+
+                        // NOTE that we only do ONE change per run through telemetry
+                    }
+                    // Otherwise, get telemetry
+                    else
+                    {
+                        try
+                        {
+                            state.InputRegisterCache = state._client.ReadHoldingRegisters<Int16>(state.Address,FirstDataRegister,AfterLastDataRegister-FirstDataRegister).ToArray();
+                        }
+                        catch
+                        {
+                            state.InputRegisterCache = null;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            Thread.Sleep(TimeSpan.FromSeconds(2));
+        }
+    }
+
     #endregion
 
     #region IComponentModel
@@ -206,16 +294,12 @@ public class SonbestSm7820Model :  IComponentModel
     /// <returns>All telemetry we wish to send at this time, or null for don't send any</returns>
     object? IComponentModel.GetTelemetry()
     {
-        // NOTE: I really need to refactor all this. Because the sensor is so sensitive to read/write timing,
-        // I should have a single background thread which is independently responsible for ALL interaction
-        // with the sensor. Even telemetry is read in there. Then all the customer-facing use of this class
-        // will always get cached values.
+        // Take a copy in this thread of the input registers
+        var inputs = InputRegisterCache;
 
-        if (!UartOK)
+        // If no readings yet, then we have no telemetry
+        if (inputs is null)
             return null;
-
-        // Read input registers
-        var inputs = _client.ReadHoldingRegisters<Int16>(Address,FirstDataRegister,AfterLastDataRegister-FirstDataRegister).ToArray();
 
         // Save those as telemetry
         var reading = new Telemetry();
@@ -225,65 +309,6 @@ public class SonbestSm7820Model :  IComponentModel
         // Update the properties which track the current values
         CurrentHumidity = reading.Humidity;
         CurrentTemperature = reading.Temperature;
-
-        // This sensor really does NOT like to read registers in rapid succession
-        // So we are starting a background task here to wait until we think it's ready
-        Task.Run(async () => 
-        {
-            await Task.Delay(TimeSpan.FromSeconds(5));
-
-            try
-            {
-                ConfigRegisterCache = _client.ReadHoldingRegisters<Int16>(Address, FirstConfigRegister, AfterLastConfigRegister - FirstConfigRegister).ToArray();
-            }
-            catch
-            {
-                ConfigRegisterCache = null;
-            }
-
-            try
-            {
-                // Process any pending register writes
-                if (! RegisterWriteQueue.IsEmpty && ConfigRegisterCache is not null)
-                {
-                    // Peek the top item
-                    if (RegisterWriteQueue.TryPeek(out var top))
-                    {
-                        // Decompose tuple
-                        var (register, value) = top;
-
-                        // Don't write the value through to the sensor IF it already has that value!
-                        if (ConfigRegisterCache[register-FirstConfigRegister] != value) 
-                        {
-                            // Wait until we think we can do this again
-                            await Task.Delay(TimeSpan.FromSeconds(5));
-
-                            // Write out the desired value
-                            _client.WriteSingleRegister(Address, register, value);
-
-                            // Update the cache, in case we report properties soon
-                            ConfigRegisterCache[register - FirstConfigRegister] = value;
-
-                            // If we have updated the address register, need to change our OWN
-                            // view on where to look for this device.
-                            // WARNING: The only way to make this change be remembered for next
-                            // time is to change the initial state config.
-                            if (register == AddressRegister)
-                                Address = value;
-                        }
-
-                        // Note that we don't DEQUEUE it until it's successfully been applied without error
-                        RegisterWriteQueue.TryDequeue(out _);
-                    }
-
-                    // NOTE that we only do ONE change per run through telemetry
-                }
-            }
-            catch
-            {
-                // Fail silently. Try again later
-            }
-        });
 
         // Return it
         return reading;
