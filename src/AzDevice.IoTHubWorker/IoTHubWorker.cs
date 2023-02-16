@@ -594,6 +594,12 @@ public sealed class IoTHubWorker : BackgroundService
             if (PropertyUpdatePeriod > oneday)
                 PropertyUpdatePeriod = oneday;
         }
+        catch (ApplicationException ex)
+        {
+            // An application exception is a soft error. Don't need to log the whole exception,
+            // just give the message and move on
+            _logger.LogError(LogEvents.PropertyReportApplicationError,"Property: Application Error. {message}", ex.Message);
+        }
         catch (AggregateException ex)
         {
             foreach (Exception exception in ex.InnerExceptions)

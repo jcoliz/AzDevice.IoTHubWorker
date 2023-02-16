@@ -32,7 +32,7 @@ public class SonbestSm7820Model :  IComponentModel
             if (ConfigRegisterCache is not null)
                 return ConfigRegisterCache[ModelCodeRegister - FirstConfigRegister];
             else
-                return -1;
+                throw new ApplicationException("Properties not fetched from sensor yet");
         }
         private set
         {
@@ -61,7 +61,7 @@ public class SonbestSm7820Model :  IComponentModel
             if (ConfigRegisterCache is not null)
                 return ConfigRegisterCache[BaudRateRegister - FirstConfigRegister];
             else
-                return -1;
+                throw new ApplicationException("Properties not fetched from sensor yet");
         }
         private set
         {
@@ -78,7 +78,7 @@ public class SonbestSm7820Model :  IComponentModel
             if (ConfigRegisterCache is not null)
                 return (double)ConfigRegisterCache[TemperatureCorrectionRegister - FirstConfigRegister] / 100.0;
             else
-                return 0;
+                throw new ApplicationException("Properties not fetched from sensor yet");
         }
         private set
         {
@@ -95,7 +95,7 @@ public class SonbestSm7820Model :  IComponentModel
             if (ConfigRegisterCache is not null)
                 return (double)ConfigRegisterCache[HumidityCorrectionRegister - FirstConfigRegister] / 100.0;
             else
-                return 0;
+                throw new ApplicationException("Properties not fetched from sensor yet");
         }
         private set
         {
@@ -140,7 +140,10 @@ public class SonbestSm7820Model :  IComponentModel
     #region Commands
     private void SetAddress(int address)
     {
-        ModBusClient!.WriteSingleRegister(Address,AddressRegister,(short)address);
+        RegisterWriteQueue.Enqueue((AddressRegister, (short)address));
+
+        // NOTE: The whole workflow of changing modbus sensor address from the cloud 
+        // needs more thinking-through.
     }
     #endregion
 
@@ -223,26 +226,46 @@ public class SonbestSm7820Model :  IComponentModel
         // So we are starting a background task here to wait until we think it's ready
         Task.Run(async () => 
         {
-            await Task.Delay(TimeSpan.FromSeconds(10));
+            await Task.Delay(TimeSpan.FromSeconds(5));
 
             try
             {
                 ConfigRegisterCache = ModBusClient!.ReadHoldingRegisters<Int16>(Address, FirstConfigRegister, AfterLastConfigRegister - FirstConfigRegister).ToArray();
+            }
+            catch
+            {
+                ConfigRegisterCache = null;
+            }
 
+            try
+            {
                 // Process any pending register writes
-                if (! RegisterWriteQueue.IsEmpty)
+                if (! RegisterWriteQueue.IsEmpty && ConfigRegisterCache is not null)
                 {
                     // Peek the top item
                     if (RegisterWriteQueue.TryPeek(out var top))
                     {
+                        // Decompose tuple
                         var (register, value) = top;
 
                         // Don't write the value through to the sensor IF it already has that value!
                         if (ConfigRegisterCache[register-FirstConfigRegister] != value) 
                         {
+                            // Wait until we think we can do this again
                             await Task.Delay(TimeSpan.FromSeconds(5));
 
+                            // Write out the desired value
                             ModBusClient.WriteSingleRegister(Address, register, value);
+
+                            // Update the cache, in case we report properties soon
+                            ConfigRegisterCache[register - FirstConfigRegister] = value;
+
+                            // If we have updated the address register, need to change our OWN
+                            // view on where to look for this device.
+                            // WARNING: The only way to make this change be remembered for next
+                            // time is to change the initial state config.
+                            if (register == AddressRegister)
+                                Address = value;
                         }
 
                         // Note that we don't DEQUEUE it until it's successfully been applied without error
@@ -254,9 +277,7 @@ public class SonbestSm7820Model :  IComponentModel
             }
             catch
             {
-                // Experimenting with how to communicate that this failed.
-                if (ConfigRegisterCache is not null)
-                    ConfigRegisterCache[ModelCodeRegister - FirstConfigRegister] = -2;
+                // Fail silently. Try again later
             }
         });
 
@@ -316,8 +337,9 @@ public class SonbestSm7820Model :  IComponentModel
             var address = Convert.ToInt16(jsonparams);
             SetAddress(address);
 
-            // TODO: Somehow, I need to force a property update for address, because we need
-            // to let the twin know where to look for it next time around.
+            // NOTE: Changing address 
+
+
 
             return Task.FromResult<object>(new());
         }

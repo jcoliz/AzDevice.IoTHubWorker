@@ -63,6 +63,7 @@ public class LogEvents
     public const int PropertyUpdateComponentOK  = 710;
     public const int PropertyReportedOK         = 720;
     public const int PropertyReportedDetail     = 721;
+    public const int PropertyReportApplicationError = 783;
     public const int PropertyReportSingleError  = 784;
     public const int PropertyReportMultipleErrors = 785;
     public const int PropertyUpdateError        = 786;
