@@ -19,8 +19,6 @@ public class ModBusExampleModel : IRootModel
 
     public DateTimeOffset StartTimeUTC { get; } = DateTimeOffset.UtcNow;
 
-    public string? SerialConnection { get; private set; }
-
     public string TelemetryPeriod 
     { 
         get
@@ -54,23 +52,23 @@ public class ModBusExampleModel : IRootModel
     /// <returns>String to identify the current device</returns>
     public override string ToString()
     {
-        return $"S/N:{SerialNumber ?? "null"} ver:{DeviceInformation.SoftwareVersion} sensor:{Sensor} uart:{SerialConnection ?? "null"}";
+        return $"S/N:{SerialNumber ?? "null"} ver:{DeviceInformation.SoftwareVersion} sensors:{Sensor},{Sensor2}";
     }
     #endregion
 
     #region Constructor
     public ModBusExampleModel(IModbusClient client, ILogger<ModBusExampleModel> logger)
     {
-        _clientm = client;
+        _client = client;
         _logger = logger;
 
-        Components["Sensor_2"] = new SonbestSm7820Model(_clientm);
+        Components["Sensor_2"] = new SonbestSm7820Model(_client,_logger);
     }
     #endregion
 
     #region Fields
     private readonly ILogger<ModBusExampleModel> _logger;
-    private readonly IModbusClient _clientm;
+    private readonly IModbusClient _client;
 
     #endregion
 
@@ -166,7 +164,7 @@ public class ModBusExampleModel : IRootModel
         if (values.ContainsKey("TelemetryPeriod"))
             TelemetryPeriod = values["TelemetryPeriod"];
 
-        _clientm.Connect();
+        _client.Connect();
     }
 
     /// <summary>

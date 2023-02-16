@@ -29,30 +29,40 @@ public class ModbusClient : IModbusClient
         if (IsConnected)
             return;
 
-        _logger.LogDebug(ModbusLogEvents.ModbusCreating, "Creating with options {options}", _options.Value);
+        try
+        {
+            _logger.LogDebug(ModbusLogEvents.ModbusCreating, "Creating with options {options}", _options.Value);
 
-        // Default is 9600
-        if (_options.Value.BaudRate.HasValue)
-            _client.BaudRate = _options.Value.BaudRate.Value;
+            // Default is 9600
+            if (_options.Value.BaudRate.HasValue)
+                _client.BaudRate = _options.Value.BaudRate.Value;
 
-        // Default is Even
-        if (_options.Value.Parity is not null)
-            _client.Parity = Enum.Parse<Parity>(_options.Value.Parity);
+            // Default is Even
+            if (_options.Value.Parity is not null)
+                _client.Parity = Enum.Parse<Parity>(_options.Value.Parity);
 
-        // Default is One
-        if (_options.Value.StopBits is not null)
-            _client.StopBits = Enum.Parse<StopBits>(_options.Value.StopBits);
+            // Default is One
+            if (_options.Value.StopBits is not null)
+                _client.StopBits = Enum.Parse<StopBits>(_options.Value.StopBits);
 
-        // Default is 1000 (milliseconds)
-        if (_options.Value.ReadTimeout.HasValue)
-            _client.ReadTimeout = _options.Value.ReadTimeout.Value;
+            // Default is 1000 (milliseconds)
+            if (_options.Value.ReadTimeout.HasValue)
+                _client.ReadTimeout = _options.Value.ReadTimeout.Value;
 
-        // TODO: Allow config of write timeout
+            // TODO: Allow config of write timeout
 
-        _client.Connect(_options.Value.Port!,ModbusEndianness.BigEndian);
-        IsConnected = true;
+            _client.Connect(_options.Value.Port!,ModbusEndianness.BigEndian);
+            IsConnected = true;
 
-        _logger.LogInformation(ModbusLogEvents.ModbusCreateOK, "Created OK");
+            _logger.LogInformation(ModbusLogEvents.ModbusCreateOK, "Created OK on {port}",_options.Value.Port);
+        }
+        catch(Exception ex)
+        {
+            var names = string.Join(',', SerialPort.GetPortNames());
+
+            _logger.LogCritical(ModbusLogEvents.ModbusCreateFailed, ex,"Failed to create on {port}. Available ports: {names}",_options.Value.Port ?? "null",names);
+            throw;
+        }
     }
 
     public Span<T> ReadHoldingRegisters<T>(int unitIdentifier, int startingAddress, int count) where T : unmanaged
