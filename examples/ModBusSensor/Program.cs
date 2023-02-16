@@ -5,14 +5,18 @@ using AzDevice.Models;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .UseSystemd() 
-    .ConfigureServices(services =>
-    {
-        services.AddHostedService<IoTHubWorker>();
-        services.AddSingleton<IRootModel,ModBusExampleModel>();
-    })
     .ConfigureAppConfiguration(config =>
     {
         config.AddTomlFile("config.toml", optional: true, reloadOnChange: true);
+    })
+    .ConfigureServices((context,services) =>
+    {
+        services.AddHostedService<IoTHubWorker>();
+        services.AddSingleton<IRootModel,ModBusExampleModel>();
+        services.AddSingleton<IModbusClient, ModbusClient>();
+        services.Configure<ModbusClientOptions>(
+            context.Configuration.GetSection(ModbusClientOptions.Section)
+        );
     })
     .Build();
 

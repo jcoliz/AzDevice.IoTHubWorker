@@ -1,9 +1,7 @@
 // Copyright (C) 2023 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
 
 using AzDevice.Models;
-using FluentModbus;
 using System.Collections.Concurrent;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 /// <summary>
@@ -147,6 +145,13 @@ public class SonbestSm7820Model :  IComponentModel
     }
     #endregion
 
+    #region Constructor
+    public SonbestSm7820Model(IModbusClient client)
+    {
+        _client = client;
+    }
+    #endregion
+
     #region Log Identity
     /// <summary>
     /// How should this component appear in the logs?
@@ -163,8 +168,7 @@ public class SonbestSm7820Model :  IComponentModel
     /// <summary>
     /// Which modbus client to use for communication
     /// </summary>
-    [JsonIgnore]
-    public ModbusRtuClient? ModBusClient { get; set; }
+    private readonly IModbusClient _client;
 
     /// <summary>
     /// Cache of registers from the sensor
@@ -185,7 +189,7 @@ public class SonbestSm7820Model :  IComponentModel
     /// </remarks>
     private readonly ConcurrentQueue<(int,short)> RegisterWriteQueue = new ConcurrentQueue<(int,short)>();
 
-    private bool UartOK => ModBusClient is not null && Address > 0;
+    private bool UartOK => Address > 0;
     #endregion
 
     #region IComponentModel
@@ -211,7 +215,7 @@ public class SonbestSm7820Model :  IComponentModel
             return null;
 
         // Read input registers
-        var inputs = ModBusClient!.ReadHoldingRegisters<Int16>(Address,FirstDataRegister,AfterLastDataRegister-FirstDataRegister).ToArray();
+        var inputs = _client.ReadHoldingRegisters<Int16>(Address,FirstDataRegister,AfterLastDataRegister-FirstDataRegister).ToArray();
 
         // Save those as telemetry
         var reading = new Telemetry();
@@ -230,7 +234,7 @@ public class SonbestSm7820Model :  IComponentModel
 
             try
             {
-                ConfigRegisterCache = ModBusClient!.ReadHoldingRegisters<Int16>(Address, FirstConfigRegister, AfterLastConfigRegister - FirstConfigRegister).ToArray();
+                ConfigRegisterCache = _client.ReadHoldingRegisters<Int16>(Address, FirstConfigRegister, AfterLastConfigRegister - FirstConfigRegister).ToArray();
             }
             catch
             {
@@ -255,7 +259,7 @@ public class SonbestSm7820Model :  IComponentModel
                             await Task.Delay(TimeSpan.FromSeconds(5));
 
                             // Write out the desired value
-                            ModBusClient.WriteSingleRegister(Address, register, value);
+                            _client.WriteSingleRegister(Address, register, value);
 
                             // Update the cache, in case we report properties soon
                             ConfigRegisterCache[register - FirstConfigRegister] = value;
@@ -337,9 +341,7 @@ public class SonbestSm7820Model :  IComponentModel
             var address = Convert.ToInt16(jsonparams);
             SetAddress(address);
 
-            // NOTE: Changing address 
-
-
+            // NOTE: Changing address needs more conceptual think-through
 
             return Task.FromResult<object>(new());
         }

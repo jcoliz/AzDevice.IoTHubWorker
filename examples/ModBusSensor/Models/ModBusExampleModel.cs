@@ -7,6 +7,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
 
+namespace AzDevice;
+
 public class ModBusExampleModel : IRootModel
 {
     #region Properties
@@ -45,10 +47,6 @@ public class ModBusExampleModel : IRootModel
 
     #endregion
 
-    #region Fields
-    private ModbusRtuClient? _client = null;
-    #endregion
-
     #region Log Identity
     /// <summary>
     /// How should this model appear in the logs?
@@ -61,11 +59,19 @@ public class ModBusExampleModel : IRootModel
     #endregion
 
     #region Constructor
-    public ModBusExampleModel(ILogger<ModBusExampleModel> logger)
+    public ModBusExampleModel(IModbusClient client, ILogger<ModBusExampleModel> logger)
     {
+        _clientm = client;
         _logger = logger;
+
+        Components["Sensor_2"] = new SonbestSm7820Model(_clientm);
     }
+    #endregion
+
+    #region Fields
     private readonly ILogger<ModBusExampleModel> _logger;
+    private readonly IModbusClient _clientm;
+
     #endregion
 
     #region IRootModel
@@ -89,10 +95,6 @@ public class ModBusExampleModel : IRootModel
             "Sensor_1",
             new Xymd02Model()
         },
-        {
-            "Sensor_2",
-            new SonbestSm7820Model()
-        },
     };
     #endregion
 
@@ -100,56 +102,6 @@ public class ModBusExampleModel : IRootModel
     private DeviceInformationModel DeviceInformation => (Components["Info"] as DeviceInformationModel)!;
     private Xymd02Model Sensor => (Components["Sensor_1"] as Xymd02Model)!;
     private SonbestSm7820Model Sensor2 => (Components["Sensor_2"] as SonbestSm7820Model)!;
-
-    private void ConnectSerial()
-    {
-        try
-        {
-            if (_client != null)
-            {
-                _client.Close();
-                _client.Dispose();
-                _client = null;
-            }
-
-            var config = SerialConnection!.Split(';').Select(x => x.Split('=')).ToDictionary(x => x[0], x => x[1]);
-
-            _client = new ModbusRtuClient();
-
-            // Default is 9600
-            if (config.ContainsKey("baud"))
-                _client.BaudRate = Convert.ToInt16(config["baud"]);
-
-            // Default is Even
-            if (config.ContainsKey("parity"))
-                _client.Parity = Enum.Parse<Parity>(config["parity"]);
-
-            // Default is One
-            if (config.ContainsKey("stop"))
-                _client.StopBits = Enum.Parse<StopBits>(config["stop"]);
-
-            // Default is 1000 (milliseconds)
-            if (config.ContainsKey("rto"))
-                _client.ReadTimeout = Convert.ToInt16(config["rto"]);
-
-            // Default is 1000 (milliseconds)
-            if (config.ContainsKey("wto"))
-                _client.WriteTimeout = Convert.ToInt16(config["wto"]);
-
-            _client.Connect(config["port"],ModbusEndianness.BigEndian);
-
-            Sensor.ModBusClient = _client;
-            Sensor2.ModBusClient = _client;
-        }
-        catch (Exception ex)
-        {
-            var available = string.Join(',',GetSerialPortNames());
-            if (string.IsNullOrEmpty(available))
-                available = "NONE";
-            var appex = new ApplicationException($"Unable to open {SerialConnection}. Available ports: {available}");
-            throw new AggregateException(new [] { appex, ex });
-        }
-    }
     #endregion
 
     #region IComponentModel
@@ -183,12 +135,11 @@ public class ModBusExampleModel : IRootModel
 
         if (key == "SerialConnection")
         {
-            var result = SerialConnection = JsonSerializer.Deserialize<string>(jsonvalue)!;
-            ConnectSerial();
+            // NOP for now
+            // TODO: Remove this
         }
 
         throw new NotImplementedException($"Property {key} is not implemented on {dtmi}");
-
     }
 
     /// <summary>
@@ -215,22 +166,7 @@ public class ModBusExampleModel : IRootModel
         if (values.ContainsKey("TelemetryPeriod"))
             TelemetryPeriod = values["TelemetryPeriod"];
 
-        if (values.ContainsKey("SerialConnection"))
-        {
-            var value = values["SerialConnection"];
-            if (value.Contains("port="))
-            {
-                SerialConnection = values["SerialConnection"];
-                ConnectSerial();
-            }
-            else
-            {
-                var available = string.Join(',',GetSerialPortNames());
-                if (string.IsNullOrEmpty(available))
-                    available = "NONE";
-                _logger.LogWarning(1071,"Uart Initial State: `{uart}` is invalid. Available ports: {ports}. Set desired SerialConnection property with correct configuration.",value,available);
-            }
-        }
+        _clientm.Connect();
     }
 
     /// <summary>
