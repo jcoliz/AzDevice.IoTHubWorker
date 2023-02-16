@@ -78,6 +78,11 @@
         },
         {
             "@type": "Component",
+            "name": "Sensor_2",
+            "schema": "dtmi:azdevice:sonbest_sm7820;1"
+        },
+        {
+            "@type": "Component",
             "name": "Info",
             "schema": "dtmi:azure:DeviceManagement:DeviceInformation;1"
         }

@@ -97,18 +97,6 @@
         },
         {
             "@type": [
-                "Property"
-            ],
-            "name": "TotalPoints",
-            "schema": "integer",
-            "displayName": {
-                "en": "Total Points"
-            },
-            "description": "Unsure what this is. I suspect it's the total # of data items this sensor provides (e.g. temp + humidity = 2).",
-            "writable": false
-        },
-        {
-            "@type": [
                 "Property",
                 "Temperature"
             ],

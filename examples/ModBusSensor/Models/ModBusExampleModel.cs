@@ -89,12 +89,17 @@ public class ModBusExampleModel : IRootModel
             "Sensor_1",
             new Xymd02Model()
         },
+        {
+            "Sensor_2",
+            new SonbestSm7820Model()
+        },
     };
     #endregion
 
     #region Internals
     private DeviceInformationModel DeviceInformation => (Components["Info"] as DeviceInformationModel)!;
     private Xymd02Model Sensor => (Components["Sensor_1"] as Xymd02Model)!;
+    private SonbestSm7820Model Sensor2 => (Components["Sensor_2"] as SonbestSm7820Model)!;
 
     private void ConnectSerial()
     {
@@ -134,6 +139,7 @@ public class ModBusExampleModel : IRootModel
             _client.Connect(config["port"],ModbusEndianness.BigEndian);
 
             Sensor.ModBusClient = _client;
+            Sensor2.ModBusClient = _client;
         }
         catch (Exception ex)
         {
