@@ -12,7 +12,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context,services) =>
     {
         services.AddHostedService<IoTHubWorker>();
-        services.AddSingleton<IRootModel,ModBusExampleModel>();
+        services.AddSingleton<IRootModel,ModbusTempHumidityMonitor>();
         services.AddSingleton<IModbusClient, ModbusClient>();
         services.Configure<ModbusClientOptions>(
             context.Configuration.GetSection(ModbusClientOptions.Section)

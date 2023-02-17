@@ -3,7 +3,7 @@
     "@id": "dtmi:azdevice:modbusexample;1",
     "@type": "Interface",
     "displayName": {
-        "en": "AzDevices Example Modbus Temp/Humidity Monitor v1"
+        "en": "AzDevice Example Modbus Temp/Humidity Monitor v1"
     },
     "contents": [
         {

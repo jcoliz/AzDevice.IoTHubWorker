@@ -1,7 +1,6 @@
 // Copyright (C) 2023 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
 
 using AzDevice.Models;
-using FluentModbus;
 using System.IO.Ports;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -9,7 +8,7 @@ using System.Xml;
 
 namespace AzDevice;
 
-public class ModBusExampleModel : IRootModel
+public class ModbusTempHumidityMonitor : IRootModel
 {
     #region Properties
 
@@ -57,7 +56,7 @@ public class ModBusExampleModel : IRootModel
     #endregion
 
     #region Constructor
-    public ModBusExampleModel(IModbusClient client, ILogger<ModBusExampleModel> logger)
+    public ModbusTempHumidityMonitor(IModbusClient client, ILogger<ModbusTempHumidityMonitor> logger)
     {
         _client = client;
         _logger = logger;
@@ -69,7 +68,7 @@ public class ModBusExampleModel : IRootModel
     #endregion
 
     #region Fields
-    private readonly ILogger<ModBusExampleModel> _logger;
+    private readonly ILogger<ModbusTempHumidityMonitor> _logger;
     private readonly IModbusClient _client;
     private readonly DeviceInformationModel _deviceinfo;
     private readonly Xymd02Model _sensor1;
@@ -138,7 +137,7 @@ public class ModBusExampleModel : IRootModel
     /// <returns>All known properties, and their current state</returns>
     object IComponentModel.GetProperties()
     {
-        return this as ModBusExampleModel;
+        return this as ModbusTempHumidityMonitor;
     }
 
     /// <summary>
