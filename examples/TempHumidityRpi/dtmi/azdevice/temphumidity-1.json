@@ -3,7 +3,7 @@
     "@id": "dtmi:azdevice:temphumidity;1",
     "@type": "Interface",
     "displayName": {
-        "en": "AzDevices Example Temp/Humidity Controller v1"
+        "en": "AzDevice Example I2C Temp/Humidity Monitor v1"
     },
     "contents": [
         {
