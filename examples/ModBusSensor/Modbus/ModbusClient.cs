@@ -9,11 +9,15 @@ namespace AzDevice;
 /// <summary>
 /// Modbus client wrapper for use in dependency injection
 /// </summary>
+/// <remarks>
+/// Also provides thread safety against conflicting bus access
+/// </remarks>
 public class ModbusClient : IModbusClient
 {
     private readonly IOptions<ModbusClientOptions> _options;
     private readonly ILogger<ModbusClient> _logger;
     private readonly ModbusRtuClient _client;
+    private readonly Mutex _mutex = new Mutex();
 
     public ModbusClient(IOptions<ModbusClientOptions> options, ILogger<ModbusClient> logger)
     {
@@ -66,16 +70,32 @@ public class ModbusClient : IModbusClient
     }
     public Span<T> ReadInputRegisters<T>(int unitIdentifier, int startingAddress, int count) where T : unmanaged
     {
-        return _client.ReadInputRegisters<T>(unitIdentifier, startingAddress, count);
+        _mutex.WaitOne();
+
+        var result = _client.ReadInputRegisters<T>(unitIdentifier, startingAddress, count);
+
+        _mutex.ReleaseMutex();
+
+        return result;
     }
 
     public Span<T> ReadHoldingRegisters<T>(int unitIdentifier, int startingAddress, int count) where T : unmanaged
     {
-        return _client.ReadHoldingRegisters<T>(unitIdentifier, startingAddress, count);
+        _mutex.WaitOne();
+
+        var result = _client.ReadHoldingRegisters<T>(unitIdentifier, startingAddress, count);
+
+        _mutex.ReleaseMutex();
+
+        return result;
     }
 
     public void WriteSingleRegister(int unitIdentifier, int registerAddress, short value)
     {
+        _mutex.WaitOne();
+
         _client.WriteSingleRegister(unitIdentifier, registerAddress, value);
+
+        _mutex.ReleaseMutex();
     }
 }
