@@ -10,6 +10,9 @@ public class Xymd02Model :  IComponentModel
     [JsonPropertyName("__t")]
     public string ComponentID => "c";
 
+    /// <summary>
+    /// Location on Modbus where this sensor is to be found
+    /// </summary>
     public int Address { get; private set; }
 
     public int BaudRate
@@ -17,11 +20,6 @@ public class Xymd02Model :  IComponentModel
         get
         {
             return UartOK ? _client.ReadHoldingRegisters<Int16>(Address, BaudRateRegister, 1)[0] : 0;
-        }
-        set
-        {
-            if (UartOK)
-                _client.WriteSingleRegister(Address,BaudRateRegister,(short)value);
         }
     }
 
@@ -189,8 +187,7 @@ public class Xymd02Model :  IComponentModel
         if (values.ContainsKey("Address"))
             Address = Convert.ToInt16(values["Address"]);
 
-        _logger.LogDebug(3001, "Sensor {sensor}: Ready? {isready}",this.ToString(),UartOK);
-
+        _logger.LogDebug(LogEvents.SensorReady, "Sensor {sensor}: Ready? {isready}",this.ToString(),UartOK);
     }
 
     /// <summary>
@@ -201,17 +198,6 @@ public class Xymd02Model :  IComponentModel
     /// <returns>Unserialized result of the action, or new() for empty result</returns>
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
-        if (name == "SetAddress")
-        {
-            var address = Convert.ToInt16(jsonparams);
-            SetAddress(address);
-
-            // TODO: Somehow, I need to force a property update for address, because we need
-            // to let the twin know where to look for it next time around.
-
-            return Task.FromResult<object>(new());
-        }
-
         throw new NotImplementedException($"Command {name} is not implemented on {dtmi}");
     }
  

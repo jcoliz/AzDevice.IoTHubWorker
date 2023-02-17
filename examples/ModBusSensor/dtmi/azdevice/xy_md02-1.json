@@ -3,7 +3,7 @@
     "@id": "dtmi:azdevice:xy_md02;1",
     "@type": "Interface",
     "displayName": {
-        "en": "XY-MD02 ModBus Humidity and Temperature Sensor"
+        "en": "XY-MD02 Modbus Humidity and Temperature Sensor"
     },
     "description": "XY-MD02 Temperature and Humidity Transmitter Detection Sensor Module Modbus SHT20 Temperature Sensor RS485 Signal Analog",
     "contents": [
@@ -38,9 +38,9 @@
             "name": "Address",
             "schema": "integer",
             "displayName": {
-                "en": "ModBus Server Address"
+                "en": "Modbus Server Address"
             },
-            "description": "Location on ModBus where this sensor is to be found",
+            "description": "Location on Modbus where this sensor is to be found",
             "writable": false
         },
         {
@@ -53,7 +53,7 @@
                 "en": "Serial bus speed"
             },
             "description": "Speed of serial bus to be used with this sensor",
-            "writable": true
+            "writable": false
         },
         {
             "@type": [
@@ -106,16 +106,6 @@
             },
             "unit": "percent",
             "writable": false
-        },
-        {
-            "@type": "Command",
-            "name": "SetAddress",
-            "displayName": "Set New ModBus Address",
-            "description": "Move this sensor to a new address on ModBus.",
-            "request": {
-                "name": "Address",
-                "schema": "integer"
-            }
         }
     ]
 }

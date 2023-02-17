@@ -3,7 +3,7 @@
     "@id": "dtmi:azdevice:sonbest_sm7820;1",
     "@type": "Interface",
     "displayName": {
-        "en": "SonBest SM7820 ModBus Humidity and Temperature Sensor"
+        "en": "SonBest SM7820 Modbus Humidity and Temperature Sensor"
     },
     "description": "SM7820B using the standard RS485 bus MODBUS-RTU protocol, easy access to PLC, DCS and other instruments or systems for monitoring temperature,humidity state quantities.The internal use of high-precision sensing core and related devices to ensure high reliability and excellent long-term stability.",
     "contents": [
@@ -38,9 +38,9 @@
             "name": "Address",
             "schema": "integer",
             "displayName": {
-                "en": "ModBus Server Address"
+                "en": "Modbus Server Address"
             },
-            "description": "Location on ModBus where this sensor is to be found",
+            "description": "Location on Modbus where this sensor is to be found",
             "writable": false
         },
         {
@@ -82,7 +82,7 @@
                 "en": "Serial bus speed"
             },
             "description": "Speed of serial bus to be used with this sensor",
-            "writable": true
+            "writable": false
         },
         {
             "@type": [
@@ -146,16 +146,6 @@
             },
             "unit": "percent",
             "writable": false
-        },
-        {
-            "@type": "Command",
-            "name": "SetAddress",
-            "displayName": "Set New ModBus Address",
-            "description": "Move this sensor to a new address on ModBus.",
-            "request": {
-                "name": "Address",
-                "schema": "integer"
-            }
         }
     ]
 }

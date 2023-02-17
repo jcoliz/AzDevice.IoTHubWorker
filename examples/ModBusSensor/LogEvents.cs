@@ -5,9 +5,16 @@
 /// </summary>
 public class LogEvents
 {
-    // 3x. SM7820
-    // 30. SM7820 Background worker
-    public const int BackgroundInputsError = 3086;
-    public const int BackgroundCacheError = 3087;
-    public const int BackgroundError = 3088;
+    // 1x. Root Model
+    // 2x. Modbus
+
+    // 3x. Sensor generally
+
+    public const int SensorReady = 3001;
+
+    // 4x. SM7820
+    // 40. SM7820 Background worker
+    public const int BackgroundInputsError = 4086;
+    public const int BackgroundCacheError = 4087;
+    public const int BackgroundError = 4088;
 }

@@ -17,8 +17,14 @@ public class SonbestSm7820Model :  IComponentModel
     [JsonPropertyName("__t")]
     public string ComponentID => "c";
 
+    /// <summary>
+    /// Location on Modbus where this sensor is to be found
+    /// </summary>
     public int Address { get; private set; }
 
+    /// <summary>
+    /// Code for this particular sensor model
+    /// </summary>
     public int ModelCode
     { 
         get
@@ -39,17 +45,6 @@ public class SonbestSm7820Model :  IComponentModel
         }
     }
 
-    public enum BaudRateEnum 
-    {
-        Invalid = 0,
-        Baud2400 = 1,
-        Baud4800 = 2,
-        Baud9600 = 3,
-        Baud19200 = 4,
-        Baud38400 = 5,
-        Baud115200 = 6
-    }
-
     public int BaudRate 
     { 
         get
@@ -60,12 +55,6 @@ public class SonbestSm7820Model :  IComponentModel
                 return HoldingRegisterCache[BaudRateRegister - FirstConfigRegister];
             else
                 throw new ApplicationException("Properties not fetched from sensor yet");
-        }
-        private set
-        {
-            // Not implemented, ignored right now
-            // Changing the baud rate is a risky operation.
-            // This sensor is so temperamental as it is, I really don't want to risk this.            
         }
     }
 
@@ -125,13 +114,6 @@ public class SonbestSm7820Model :  IComponentModel
     #endregion
 
     #region Commands
-    private void SetAddress(int address)
-    {
-        RegisterWriteQueue.Enqueue((AddressRegister, (short)address));
-
-        // NOTE: The whole workflow of changing modbus sensor address from the cloud 
-        // needs more thinking-through.
-    }
     #endregion
 
     #region Constructor
@@ -386,9 +368,6 @@ public class SonbestSm7820Model :  IComponentModel
         if (key == "HumidityCorrection")
             return HumidityCorrection = Convert.ToDouble(jsonvalue);
 
-        if (key == "BaudRate")
-            return BaudRate = Convert.ToInt16(jsonvalue);
-
         throw new NotImplementedException($"Property {key} is not implemented on {dtmi}");
     }
 
@@ -410,7 +389,7 @@ public class SonbestSm7820Model :  IComponentModel
         if (values.ContainsKey("Address"))
             Address = Convert.ToInt16(values["Address"]);
 
-        _logger.LogDebug(3001, "Sensor {sensor}: Ready? {isready}",this.ToString(),UartOK);
+        _logger.LogDebug(LogEvents.SensorReady, "Sensor {sensor}: Ready? {isready}",this.ToString(),UartOK);
     }
 
     /// <summary>
@@ -421,16 +400,6 @@ public class SonbestSm7820Model :  IComponentModel
     /// <returns>Unserialized result of the action, or new() for empty result</returns>
     Task<object> IComponentModel.DoCommandAsync(string name, string jsonparams)
     {
-        if (name == "SetAddress")
-        {
-            var address = Convert.ToInt16(jsonparams);
-            SetAddress(address);
-
-            // NOTE: Changing address needs more conceptual think-through
-
-            return Task.FromResult<object>(new());
-        }
-
         throw new NotImplementedException($"Command {name} is not implemented on {dtmi}");
     }
  

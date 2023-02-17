@@ -171,11 +171,6 @@ public class ModBusExampleModel : IRootModel
         {
             return Task.FromResult<object>(GetSerialPortNames());
         }
-        else if (name == "GetModBus")
-        {
-            // TODO: Implement me!
-            return Task.FromResult<object>(new());
-        }
         throw new NotImplementedException($"Command {name} is not implemented on {dtmi}");
     }
 

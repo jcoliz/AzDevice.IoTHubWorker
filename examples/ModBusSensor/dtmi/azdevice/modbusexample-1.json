@@ -53,19 +53,6 @@
             }
         },
         {
-            "@type": "Command",
-            "name": "GetModBus",
-            "displayName": "Get Active ModBus Addresses",
-            "description": "This command returns all the modbus addresses which currently have units attached to them.",
-            "response": {
-                "name": "Addresses",
-                "schema": {
-                    "@type": "Array",
-                    "elementSchema": "integer"
-                }
-            }
-        },
-        {
             "@type": "Component",
             "name": "Sensor_1",
             "schema": "dtmi:azdevice:xy_md02;1"
