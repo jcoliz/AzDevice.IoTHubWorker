@@ -1,0 +1,10 @@
+[Unit]
+Description=AzDevice Example Modbus Temp/Humidity Monitor
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=notify
+WorkingDirectory=/opt/ModbusTempHumidityMonitor
+ExecStart=/opt/ModbusTempHumidityMonitor/ModbusTempHumidityMonitor

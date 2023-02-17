@@ -1,2 +1,2 @@
 #!/bin/bash
-systemctl stop modbussensor || true
+systemctl stop modbusthm || true

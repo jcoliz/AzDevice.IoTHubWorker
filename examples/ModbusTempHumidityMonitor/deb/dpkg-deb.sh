@@ -10,7 +10,7 @@ if [ "$4" == "amd64" ]; then
     echo "Depends: dotnet-runtime-7.0" >> publish_output/DEBIAN/control
 fi
 if [ "$4" == "arm64" ]; then
-    echo "Environment=\"DOTNET_ROOT=/opt/dotnet\"" >> publish_output/etc/systemd/system/modbussensor.service
+    echo "Environment=\"DOTNET_ROOT=/opt/dotnet\"" >> publish_output/etc/systemd/system/modbusthm.service
 fi
 
 dpkg-deb --build publish_output/ $1/$2_$3_$4.deb

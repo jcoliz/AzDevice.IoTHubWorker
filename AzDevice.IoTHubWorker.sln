@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClimateMonitor", "examples\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TempHumidityRpi", "examples\TempHumidityRpi\TempHumidityRpi.csproj", "{7E31D9C1-BB7C-406B-9D07-76D2A4CB8B20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModBusSensor", "examples\ModBusSensor\ModBusSensor.csproj", "{30D35677-06A6-48F0-98FB-236F08ABD4F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModBusSensor", "examples\ModbusTempHumidityMonitor\ModbusTempHumidityMonitor.csproj", "{30D35677-06A6-48F0-98FB-236F08ABD4F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
