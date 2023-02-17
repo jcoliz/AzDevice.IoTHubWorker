@@ -64,6 +64,10 @@ public class ModbusClient : IModbusClient
             throw;
         }
     }
+    public Span<T> ReadInputRegisters<T>(int unitIdentifier, int startingAddress, int count) where T : unmanaged
+    {
+        return _client.ReadInputRegisters<T>(unitIdentifier, startingAddress, count);
+    }
 
     public Span<T> ReadHoldingRegisters<T>(int unitIdentifier, int startingAddress, int count) where T : unmanaged
     {

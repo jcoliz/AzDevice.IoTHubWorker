@@ -23,7 +23,9 @@ public class SonbestSm7820Model :  IComponentModel
     { 
         get
         {
-            if (HoldingRegisterCache is not null)
+            if (!UartOK)
+                return -1;
+            else if (HoldingRegisterCache is not null)
                 return HoldingRegisterCache[ModelCodeRegister - FirstConfigRegister];
             else
                 throw new ApplicationException("Properties not fetched from sensor yet");
@@ -52,7 +54,9 @@ public class SonbestSm7820Model :  IComponentModel
     { 
         get
         {
-            if (HoldingRegisterCache is not null)
+            if (!UartOK)
+                return -1;
+            else if (HoldingRegisterCache is not null)
                 return HoldingRegisterCache[BaudRateRegister - FirstConfigRegister];
             else
                 throw new ApplicationException("Properties not fetched from sensor yet");
@@ -69,7 +73,9 @@ public class SonbestSm7820Model :  IComponentModel
     { 
         get
         {
-            if (HoldingRegisterCache is not null)
+            if (!UartOK)
+                return 0;
+            else if (HoldingRegisterCache is not null)
                 return (double)HoldingRegisterCache[TemperatureCorrectionRegister - FirstConfigRegister] / 100.0;
             else
                 throw new ApplicationException("Properties not fetched from sensor yet");
@@ -86,7 +92,9 @@ public class SonbestSm7820Model :  IComponentModel
     { 
         get
         {
-            if (HoldingRegisterCache is not null)
+            if (!UartOK)
+                return 0;
+            else if (HoldingRegisterCache is not null)
                 return (double)HoldingRegisterCache[HumidityCorrectionRegister - FirstConfigRegister] / 100.0;
             else
                 throw new ApplicationException("Properties not fetched from sensor yet");
@@ -154,6 +162,9 @@ public class SonbestSm7820Model :  IComponentModel
     /// </summary>
     private readonly IModbusClient _client;
 
+    /// <summary>
+    /// Where to log events
+    /// </summary>
     private readonly ILogger _logger;
 
     /// <summary>

@@ -17,12 +17,6 @@
         },
         {
             "@type": "Property",
-            "name": "SerialConnection",
-            "writable": true,
-            "schema": "string"
-        },
-        {
-            "@type": "Property",
             "name": "TelemetryPeriod",
             "writable": true,
             "schema": "duration"

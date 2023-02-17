@@ -52,7 +52,7 @@ public class ModBusExampleModel : IRootModel
     /// <returns>String to identify the current device</returns>
     public override string ToString()
     {
-        return $"S/N:{SerialNumber ?? "null"} ver:{DeviceInformation.SoftwareVersion} sensors:{Sensor},{Sensor2}";
+        return $"S/N:{SerialNumber ?? "null"} ver:{_deviceinfo.SoftwareVersion} sensors:{_sensor1},{_sensor2}";
     }
     #endregion
 
@@ -62,14 +62,18 @@ public class ModBusExampleModel : IRootModel
         _client = client;
         _logger = logger;
 
-        Components["Sensor_2"] = new SonbestSm7820Model(_client,_logger);
+        Components["Info"] = _deviceinfo = new DeviceInformationModel();
+        Components["Sensor_1"] = _sensor1 = new Xymd02Model(_client,_logger);
+        Components["Sensor_2"] = _sensor2 = new SonbestSm7820Model(_client,_logger);
     }
     #endregion
 
     #region Fields
     private readonly ILogger<ModBusExampleModel> _logger;
     private readonly IModbusClient _client;
-
+    private readonly DeviceInformationModel _deviceinfo;
+    private readonly Xymd02Model _sensor1;
+    private readonly SonbestSm7820Model _sensor2;
     #endregion
 
     #region IRootModel
@@ -83,23 +87,11 @@ public class ModBusExampleModel : IRootModel
     /// The components which are contained within this one
     /// </summary>
     [JsonIgnore]
-    public IDictionary<string, IComponentModel> Components { get; } = new Dictionary<string, IComponentModel>()
-    {
-        { 
-            "Info", 
-            new DeviceInformationModel()
-        },
-        {
-            "Sensor_1",
-            new Xymd02Model()
-        },
-    };
+    public IDictionary<string, IComponentModel> Components { get; } = new Dictionary<string, IComponentModel>();
     #endregion
 
     #region Internals
-    private DeviceInformationModel DeviceInformation => (Components["Info"] as DeviceInformationModel)!;
-    private Xymd02Model Sensor => (Components["Sensor_1"] as Xymd02Model)!;
-    private SonbestSm7820Model Sensor2 => (Components["Sensor_2"] as SonbestSm7820Model)!;
+
     #endregion
 
     #region IComponentModel
@@ -156,7 +148,7 @@ public class ModBusExampleModel : IRootModel
     void IComponentModel.SetInitialState(IDictionary<string, string> values)
     {
         if (values.ContainsKey("Version"))
-            DeviceInformation.SoftwareVersion = values["Version"];
+            _deviceinfo.SoftwareVersion = values["Version"];
 
         if (values.ContainsKey("SerialNumber"))
             SerialNumber = values["SerialNumber"];
@@ -178,6 +170,11 @@ public class ModBusExampleModel : IRootModel
         if (name == "GetSerialPortNames")
         {
             return Task.FromResult<object>(GetSerialPortNames());
+        }
+        else if (name == "GetModBus")
+        {
+            // TODO: Implement me!
+            return Task.FromResult<object>(new());
         }
         throw new NotImplementedException($"Command {name} is not implemented on {dtmi}");
     }

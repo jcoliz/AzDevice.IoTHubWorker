@@ -1,8 +1,6 @@
 // Copyright (C) 2023 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
 
 using AzDevice.Models;
-using FluentModbus;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 public class Xymd02Model :  IComponentModel
@@ -18,12 +16,12 @@ public class Xymd02Model :  IComponentModel
     {
         get
         {
-            return UartOK ? ModBusClient!.ReadHoldingRegisters<Int16>(Address, BaudRateRegister, 1)[0] : 0;
+            return UartOK ? _client.ReadHoldingRegisters<Int16>(Address, BaudRateRegister, 1)[0] : 0;
         }
         set
         {
             if (UartOK)
-                ModBusClient!.WriteSingleRegister(Address,BaudRateRegister,(short)value);
+                _client.WriteSingleRegister(Address,BaudRateRegister,(short)value);
         }
     }
 
@@ -31,12 +29,12 @@ public class Xymd02Model :  IComponentModel
     {
         get
         {
-            return UartOK ? ModBusClient!.ReadHoldingRegisters<Int16>(Address,TemperatureCorrectionRegister,1)[0] / 10.0 : 0;
+            return UartOK ? _client.ReadHoldingRegisters<Int16>(Address,TemperatureCorrectionRegister,1)[0] / 10.0 : 0;
         }
         set
         {
             if (UartOK)
-                ModBusClient!.WriteSingleRegister(Address,TemperatureCorrectionRegister,(short)(value*10.0));
+                _client.WriteSingleRegister(Address,TemperatureCorrectionRegister,(short)(value*10.0));
         }
     }
 
@@ -44,12 +42,12 @@ public class Xymd02Model :  IComponentModel
     {
         get
         {
-            return UartOK ? ModBusClient!.ReadHoldingRegisters<Int16>(Address,HumidityCorrectionRegister,1)[0] / 10.0 : 0;
+            return UartOK ? _client.ReadHoldingRegisters<Int16>(Address,HumidityCorrectionRegister,1)[0] / 10.0 : 0;
         }
         set
         {
             if (UartOK)
-                ModBusClient!.WriteSingleRegister(Address,HumidityCorrectionRegister,(short)(value*10.0));
+                _client.WriteSingleRegister(Address,HumidityCorrectionRegister,(short)(value*10.0));
         }
     }
 
@@ -82,9 +80,18 @@ public class Xymd02Model :  IComponentModel
     #region Commands
     private void SetAddress(int address)
     {
-        ModBusClient!.WriteSingleRegister(Address,AddressRegister,(short)address);
+        _client.WriteSingleRegister(Address,AddressRegister,(short)address);
     }
     #endregion
+
+    #region Constructor
+    public Xymd02Model(IModbusClient client, ILogger logger)
+    {
+        _client = client;
+        _logger = logger;
+    }
+    #endregion
+
 
     #region Log Identity
     /// <summary>
@@ -98,10 +105,20 @@ public class Xymd02Model :  IComponentModel
     #endregion
 
     #region Internals
-    [JsonIgnore]
-    public ModbusRtuClient? ModBusClient { get; set; }
+    /// <summary>
+    /// Which modbus client to use for communication
+    /// </summary>
+    private readonly IModbusClient _client;
 
-    private bool UartOK => ModBusClient is not null && Address > 0;
+    /// <summary>
+    /// Where to log events
+    /// </summary>
+    private readonly ILogger _logger;
+
+    /// <summary>
+    /// Whether we should expect modbus operations to succeed
+    /// </summary>
+    private bool UartOK => _client.IsConnected && Address > 0;
     #endregion
 
     #region IComponentModel
@@ -118,11 +135,11 @@ public class Xymd02Model :  IComponentModel
     /// <returns>All telemetry we wish to send at this time, or null for don't send any</returns>
     object? IComponentModel.GetTelemetry()
     {
-        if (ModBusClient is null || Address == 0)
+        if (!UartOK)
             return null;
 
         // Read input registers
-        var inputs = ModBusClient!.ReadInputRegisters<Int16>(Address,TemperatureRegister,2).ToArray();
+        var inputs = _client.ReadInputRegisters<Int16>(Address,TemperatureRegister,2).ToArray();
 
         // Save those as telemetry
         var reading = new Telemetry();
@@ -171,6 +188,9 @@ public class Xymd02Model :  IComponentModel
     {
         if (values.ContainsKey("Address"))
             Address = Convert.ToInt16(values["Address"]);
+
+        _logger.LogDebug(3001, "Sensor {sensor}: Ready? {isready}",this.ToString(),UartOK);
+
     }
 
     /// <summary>
