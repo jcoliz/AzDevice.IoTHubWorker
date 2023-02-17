@@ -25,55 +25,43 @@ public class SonbestSm7820Model :  IComponentModel
     /// <summary>
     /// Code for this particular sensor model
     /// </summary>
-    public int ModelCode
-    { 
-        get
+    public int ModelCode => 
+        UartOK switch
         {
-            if (!UartOK)
-                return -1;
-            else if (HoldingRegisterCache is not null)
-                return HoldingRegisterCache[ModelCodeRegister - FirstConfigRegister];
-            else
-                throw new ApplicationException("Properties not fetched from sensor yet");
-        }
-        private set
-        {
-            // The data sheet seems to indicate that we can WRITE a new model code.
-            // It's not clear what is the use backing that, so we are not implementing
-            // this functionality in software.
-            throw new NotImplementedException();
-        }
-    }
+            true => _client!.ReadHoldingRegisters<Int16>(Address, ModelCodeRegister, 1).ToArray()[0],
+            false => -1
+        };
 
-    public int BaudRate 
-    { 
-        get
+    /// <summary>
+    /// Bus speed currently expected by this device
+    /// </summary>
+    /// <remarks>
+    /// This is an enum. The DTMI knows how to handle it. We do not allow changing it, because that seems dangerous
+    /// </remarks>
+    public int BaudRate => 
+        UartOK switch
         {
-            if (!UartOK)
-                return -1;
-            else if (HoldingRegisterCache is not null)
-                return HoldingRegisterCache[BaudRateRegister - FirstConfigRegister];
-            else
-                throw new ApplicationException("Properties not fetched from sensor yet");
-        }
-    }
+            true => _client!.ReadHoldingRegisters<Int16>(Address, BaudRateRegister, 1).ToArray()[0],
+            false => -1
+        };
 
     public double TemperatureCorrection
     { 
         get
         {
-            if (!UartOK)
-                return 0;
-            else if (HoldingRegisterCache is not null)
-                return (double)HoldingRegisterCache[TemperatureCorrectionRegister - FirstConfigRegister] / 100.0;
-            else
-                throw new ApplicationException("Properties not fetched from sensor yet");
+            return UartOK switch
+            {
+                true => (double)(_client!.ReadHoldingRegisters<Int16>(Address, TemperatureCorrectionRegister, 1).ToArray()[0]) / 100.0,
+                false => 0
+            };
         }
         private set
         {
-            // Queue up the register change for later when it's a good time
-            short newval = (short)(value * 100.0);
-            RegisterWriteQueue.Enqueue((TemperatureCorrectionRegister, newval));
+            if (UartOK)
+            {
+                short newval = (short)(value * 100.0);
+                _client.WriteSingleRegister(Address, TemperatureCorrectionRegister, newval);
+            }
         }
     }
 
@@ -81,18 +69,19 @@ public class SonbestSm7820Model :  IComponentModel
     { 
         get
         {
-            if (!UartOK)
-                return 0;
-            else if (HoldingRegisterCache is not null)
-                return (double)HoldingRegisterCache[HumidityCorrectionRegister - FirstConfigRegister] / 100.0;
-            else
-                throw new ApplicationException("Properties not fetched from sensor yet");
+            return UartOK switch
+            {
+                true => (double)(_client!.ReadHoldingRegisters<Int16>(Address, HumidityCorrectionRegister, 1).ToArray()[0]) / 100.0,
+                false => 0
+            };
         }
         private set
         {
-            // Queue up the register change for later when it's a good time
-            short newval = (short)(value * 100.0);
-            RegisterWriteQueue.Enqueue((HumidityCorrectionRegister, newval));
+            if (UartOK)
+            {
+                short newval = (short)(value * 100.0);
+                _client.WriteSingleRegister(Address, HumidityCorrectionRegister, newval);
+            }
         }
     }
 
@@ -121,8 +110,6 @@ public class SonbestSm7820Model :  IComponentModel
     {
         _client = client;
         _logger = logger;
-
-        ThreadPool.QueueUserWorkItem<SonbestSm7820Model>(BackgroundWork, this, preferLocal: true);
     }
     #endregion
 
@@ -137,7 +124,7 @@ public class SonbestSm7820Model :  IComponentModel
     }
     #endregion
 
-    #region Internals
+    #region Fields
 
     /// <summary>
     /// Which modbus client to use for communication
@@ -148,30 +135,6 @@ public class SonbestSm7820Model :  IComponentModel
     /// Where to log events
     /// </summary>
     private readonly ILogger _logger;
-
-    /// <summary>
-    /// Cache of holding (read/write) registers from the sensor
-    /// </summary>
-    /// <remarks>
-    /// Allows us to read them all in one operation, and provide them to callers
-    /// as-needed
-    /// </remarks>
-    private short[]? HoldingRegisterCache;
-
-    /// <summary>
-    /// Cache of input (read-only) registers from the sensor
-    /// </summary>
-    private short[]? InputRegisterCache;
-
-    /// <summary>
-    /// Queue of write operations to holding registers
-    /// </summary>
-    /// <remarks>
-    /// Allows us to control the timing of write operations for when we think will
-    /// be most successful, given the temperamental nature of this sensor. Also lets
-    /// us retain the desired state until the write operation IS finally done.
-    /// </remarks>
-    private readonly ConcurrentQueue<(int,short)> RegisterWriteQueue = new ConcurrentQueue<(int,short)>();
 
     /// <summary>
     /// Whether we should expect modbus operations to succeed
@@ -185,137 +148,10 @@ public class SonbestSm7820Model :  IComponentModel
     const int HumidityRegister = 1;
     const int AfterLastDataRegister = 2;
     
-    const int FirstConfigRegister = 0x64;
     const int ModelCodeRegister = 0x64;
-    const int AddressRegister = 0x66;
     const int BaudRateRegister = 0x67;
     const int TemperatureCorrectionRegister = 0x6B;
     const int HumidityCorrectionRegister = 0x6C;
-    const int AfterLastConfigRegister = 0x6D;
-    #endregion
-
-    #region Background Work
-    /// <summary>
-    /// Runs all work with modbus in the backgound
-    /// </summary>
-    /// <remarks>
-    /// This avoids multiple modbus operations attempting to happen at the same time
-    /// </remarks>
-    /// <param name="state"></param>
-    private static void BackgroundWork(SonbestSm7820Model state)
-    {
-        while(true)
-        {
-            try
-            {
-                if (state.UartOK)
-                {
-                    if ( state.UpdateHoldingRegisterCacheIfNeeded() || state.WriteRegisterQueueIfNeeded() )
-                    {
-                        // No further operations once we have done ONE of those operations
-                    }
-                    else
-                        state.UpdateInputRegisterCache();
-                }
-            }
-            catch (Exception ex)
-            {
-                state._logger.LogError(LogEvents.BackgroundError, ex,"Sensor {sensor} Background Error", state.ToString());
-            }
-
-            // Wait a bit to let the bus settle
-            Thread.Sleep(TimeSpan.FromSeconds(1));
-        }
-    }
-
-    /// <summary>
-    /// Update our internal view of the holding register cache (only if currently empty)
-    /// </summary>
-    /// <returns>True if we did a modbus operation</returns>
-    private bool UpdateHoldingRegisterCacheIfNeeded()
-    {
-        bool didwork = false;
-
-        if(HoldingRegisterCache is null)
-        {
-            try
-            {
-                didwork = true;            
-                HoldingRegisterCache = _client.ReadHoldingRegisters<Int16>(Address, FirstConfigRegister, AfterLastConfigRegister - FirstConfigRegister).ToArray();
-            }
-            catch (Exception ex)
-            {
-                // Failed. Try again next time!
-                HoldingRegisterCache = null;
-
-                _logger.LogError(LogEvents.BackgroundCacheError, ex, "Sensor {sensor} Background Error in UpdateHoldingRegisterCacheIfNeeded", this.ToString());
-            }
-        }
-
-        return didwork;
-    }
-
-    /// <summary>
-    /// Write one holding register out (if writes are queued up) 
-    /// </summary>
-    /// <returns>True if we did a modbus operation</returns>
-    private bool WriteRegisterQueueIfNeeded()
-    {
-        bool didwork = false;
-
-        if (! RegisterWriteQueue.IsEmpty )
-        {
-            // As long as we haven't yet used the modbus, Peek the top item
-            while (!didwork && RegisterWriteQueue.TryPeek(out var top))
-            {
-                // Decompose tuple
-                var (register, value) = top;
-
-                // Don't write the value through to the sensor IF it already has that value!
-                if (HoldingRegisterCache![register-FirstConfigRegister] != value) 
-                {
-                    // Only now are we sure we're going to hit the modbus
-                    didwork = true;
-
-                    // Write out the desired value
-                    _client.WriteSingleRegister(Address, register, value);
-
-                    // Update the cache, in case we report properties soon
-                    HoldingRegisterCache![register - FirstConfigRegister] = value;
-
-                    // If we have updated the address register, need to change our OWN
-                    // view on where to look for this device.
-                    // WARNING: The only way to make this change be remembered for next
-                    // time is to change the initial state config.
-                    if (register == AddressRegister)
-                        Address = value;
-                }
-
-                // Note that we don't DEQUEUE it until it's successfully been applied without error
-                RegisterWriteQueue.TryDequeue(out _);
-            }
-
-            // NOTE that we only do ONE actual interaction with modbus at a time
-        }
-
-        return didwork;
-    }
-
-    private void UpdateInputRegisterCache()
-    {
-        try
-        {
-            InputRegisterCache = _client!.ReadHoldingRegisters<Int16>(Address,FirstDataRegister,AfterLastDataRegister-FirstDataRegister).ToArray();
-        }
-        catch (Exception ex)
-        {
-            // Failed! Try again next time
-            InputRegisterCache = null;
-
-            _logger.LogError(LogEvents.BackgroundInputsError, ex, "Sensor {sensor} Background Error in UpdateInputRegisterCache", this.ToString());
-        }
-    }
-
     #endregion
 
     #region IComponentModel
@@ -332,12 +168,11 @@ public class SonbestSm7820Model :  IComponentModel
     /// <returns>All telemetry we wish to send at this time, or null for don't send any</returns>
     object? IComponentModel.GetTelemetry()
     {
-        // Take a copy in this thread of the input register cache
-        var inputs = InputRegisterCache;
-
-        // If no readings yet, then we have no telemetry
-        if (inputs is null)
+        if (!UartOK)
             return null;
+
+        // Grab telemetry from sensor
+        var inputs = _client!.ReadHoldingRegisters<Int16>(Address,FirstDataRegister,AfterLastDataRegister-FirstDataRegister).ToArray();
 
         // Save those as telemetry
         var reading = new Telemetry()

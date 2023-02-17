@@ -9,4 +9,8 @@ public class ModbusLogEvents
     public const int ModbusCreateOK = 2100;
     public const int ModbusCreating = 2101;
     public const int ModbusCreateFailed = 2199;
+
+    // 22. Modbus Read Holding
+    public const int ModbusReadingHolding = 2201;
+    
 }

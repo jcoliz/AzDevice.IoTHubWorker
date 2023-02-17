@@ -72,30 +72,47 @@ public class ModbusClient : IModbusClient
     {
         _mutex.WaitOne();
 
-        var result = _client.ReadInputRegisters<T>(unitIdentifier, startingAddress, count);
-
-        _mutex.ReleaseMutex();
-
-        return result;
+        try
+        {
+            var result = _client.ReadInputRegisters<T>(unitIdentifier, startingAddress, count);
+            return result;
+        }
+        finally
+        {
+            _mutex.ReleaseMutex();
+        }
     }
 
     public Span<T> ReadHoldingRegisters<T>(int unitIdentifier, int startingAddress, int count) where T : unmanaged
     {
         _mutex.WaitOne();
 
-        var result = _client.ReadHoldingRegisters<T>(unitIdentifier, startingAddress, count);
+        try
+        {
+            _logger.LogDebug(ModbusLogEvents.ModbusReadingHolding, "Reading holding {address}:{register}", unitIdentifier, startingAddress);
+            var result = _client.ReadHoldingRegisters<T>(unitIdentifier, startingAddress, count);
 
-        _mutex.ReleaseMutex();
-
-        return result;
+            // Recovery time between sequential reads ("Poll delay")
+            Thread.Sleep(TimeSpan.FromMilliseconds(100));
+            return result;
+        }
+        finally
+        {
+            _mutex.ReleaseMutex();
+        }
     }
 
     public void WriteSingleRegister(int unitIdentifier, int registerAddress, short value)
     {
         _mutex.WaitOne();
 
-        _client.WriteSingleRegister(unitIdentifier, registerAddress, value);
-
-        _mutex.ReleaseMutex();
+        try
+        {
+            _client.WriteSingleRegister(unitIdentifier, registerAddress, value);
+        }
+        finally
+        {
+            _mutex.ReleaseMutex();
+        }
     }
 }
