@@ -13,6 +13,7 @@
             "program": "${workspaceFolder}/bin/Debug/net7.0/ModbusTempHumidityMonitor.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
+            "env": { "DOTNET_ENVIRONMENT": "Development" },
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

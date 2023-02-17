@@ -1,6 +1,6 @@
 {
     "@context": "dtmi:dtdl:context;2",
-    "@id": "dtmi:azdevice:temphumidity;1",
+    "@id": "dtmi:azdevice:i2ctemphumiditymonitor;1",
     "@type": "Interface",
     "displayName": {
         "en": "AzDevice Example I2C Temp/Humidity Monitor v1"

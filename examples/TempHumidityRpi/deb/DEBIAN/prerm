@@ -1,2 +1,2 @@
 #!/bin/bash
-systemctl stop temphumidity || true
+systemctl stop i2cthm || true

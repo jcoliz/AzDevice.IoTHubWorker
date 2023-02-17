@@ -1,3 +1,3 @@
-Description: Example temperature and humidity sender
- This is a sample for Azure IoT Device Worker
+Description: I2C Temp/Humidity Monitor
+ This is a sample for AzDevice IoT Hub Worker
 Maintainer: James Coliz <jcoliz@outlook.com>

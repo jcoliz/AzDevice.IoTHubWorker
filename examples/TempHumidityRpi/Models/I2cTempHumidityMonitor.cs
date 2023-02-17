@@ -5,7 +5,10 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
 
-public class TempHumidityModel : IRootModel
+/// <summary>
+/// I2C Temperature/Humidity Monitor
+/// </summary>
+public class I2cTempHumidityMonitor : IRootModel
 {
     #region Properties
 
@@ -38,7 +41,7 @@ public class TempHumidityModel : IRootModel
 
     #region Log Identity
     /// <summary>
-    /// How should this model appear in the logs?
+    /// How should this component appear in the logs?
     /// </summary>
     /// <returns>String to identify the current device</returns>
     public override string ToString()
@@ -82,7 +85,7 @@ public class TempHumidityModel : IRootModel
     /// Identifier for this model
     /// </summary>
     [JsonIgnore]
-    public string dtmi => "dtmi:azdevice:temphumidity;1";
+    public string dtmi => "dtmi:azdevice:i2ctemphumiditymonitor;1";
 
     /// <summary>
     /// Get an object containing all current telemetry
@@ -114,7 +117,7 @@ public class TempHumidityModel : IRootModel
     /// <returns>All known properties, and their current state</returns>
     object IComponentModel.GetProperties()
     {
-        return this as TempHumidityModel;
+        return this as I2cTempHumidityMonitor;
     }
 
     /// <summary>

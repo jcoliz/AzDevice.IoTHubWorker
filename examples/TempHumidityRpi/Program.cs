@@ -8,7 +8,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         services.AddHostedService<IoTHubWorker>();
-        services.AddSingleton<IRootModel,TempHumidityModel>();
+        services.AddSingleton<IRootModel,I2cTempHumidityMonitor>();
     })
     .ConfigureAppConfiguration(config =>
     {

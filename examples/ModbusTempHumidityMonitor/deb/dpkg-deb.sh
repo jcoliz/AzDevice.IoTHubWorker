@@ -13,4 +13,4 @@ if [ "$4" == "arm64" ]; then
     echo "Environment=\"DOTNET_ROOT=/opt/dotnet\"" >> publish_output/etc/systemd/system/modbusthm.service
 fi
 
-dpkg-deb --build publish_output/ $1/$2_$3_$4.deb
+dpkg-deb --root-owner-group --build publish_output/ $1/$2_$3_$4.deb
