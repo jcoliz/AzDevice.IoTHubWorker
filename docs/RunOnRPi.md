@@ -155,7 +155,7 @@ example.
 
 ```
 PS> git clone https://github.com/jcoliz/AzDevice-IoTHubWorker.git
-PS> cd AzDevice-IoTHubWorker/examples/TempHumidityRpi
+PS> cd AzDevice-IoTHubWorker/examples/I2cTempHumidityMonitor
 PS> dotnet build
 ```
 
@@ -166,14 +166,14 @@ time developing on Windows to target Linux devices, I highly recommend having th
 
 ```
 PS> deb/Publish.ps1
-PS> scp bin/TempHumidityRpi_0.0.0-local-*_arm64.deb user@hostname:
+PS> scp bin/I2cTempHumidityMonitor_0.0.0-local-*_arm64.deb user@hostname:
 ```
 
 Alternately, you could use the same publish/copy process we used above for the device binding sample.
 
 ```
-PS> dotnet publish --configuration Release --runtime linux-arm64 --no-self-contained --output bin\publish_output\TempHumidityRpi
-PS> scp -r .\bin\publish_output\TempHumidityRpi\ user@hostname:
+PS> dotnet publish --configuration Release --runtime linux-arm64 --no-self-contained --output bin\publish_output\I2cTempHumidityMonitor
+PS> scp -r .\bin\publish_output\I2cTempHumidityMonitor\ user@hostname:
 ```
 
 ## Install & Configure the Package
@@ -181,13 +181,13 @@ PS> scp -r .\bin\publish_output\TempHumidityRpi\ user@hostname:
 Back on the target device, we'll need to install it:
 
 ```
-$ sudo apt install ./TempHumidityRpi_0.0.0-local-*_arm64.deb
+$ sudo apt install ./I2cTempHumidityMonitor_0.0.0-local-*_arm64.deb
 ```
 
 Because we're running with a true physical sensor, as opposed to a
 fake simulated sensor, we need to configure the application to pull data
 from that physical sensor. Otherwise, it will generate simulated data,
-which we don't need in this case.
+which we don't want in this case.
 
 Add these lines to the end of the `config.toml`:
 
@@ -199,7 +199,7 @@ Physical = true
 Then copy our configuration file into place:
 
 ```
-$ sudo cp config.toml /opt/TempHumidityRpi
+$ sudo cp config.toml /opt/I2cTempHumidityMonitor
 ```
 
 We're now ready to start up the example and watch the data flow to Azure IoT.
@@ -207,44 +207,44 @@ We're now ready to start up the example and watch the data flow to Azure IoT.
 ## Run it!
 
 ```
-$ sudo systemctl start temphumidity
-$ sudo systemctl status temphumidity
+$ sudo systemctl start i2cthm
+$ sudo systemctl status i2cthm
 ```
 
 ```
-● temphumidity.service - Temperature+Humidity Example
-     Loaded: loaded (/etc/systemd/system/temphumidity.service; disabled; vendor preset: enabled)
+● ic2thm.service - AzDevice Example I2C Temp/Humidity Monitor
+     Loaded: loaded (/etc/systemd/system/ic2thm.service; disabled; vendor preset: enabled)
      Active: active (running) since Thu 2023-02-09 20:58:15 PST; 10s ago
    Main PID: 1474 (TempHumidityRpi)
       Tasks: 27 (limit: 191)
         CPU: 9.791s
-     CGroup: /system.slice/temphumidity.service
-             └─1474 /opt/TempHumidityRpi/TempHumidityRpi
+     CGroup: /system.slice/ic2thm.service
+             └─1474 /opt/I2cTempHumidityMonitor/I2cTempHumidityMonitor
 
-Feb 09 20:58:14 hostname TempHumidityRpi[1474]: AzDevice.IoTHubWorker[100] Started OK
-Feb 09 20:58:14 hostname TempHumidityRpi[1474]: AzDevice.IoTHubWorker[200] Initial State: OK Applied 3 keys
-Feb 09 20:58:14 hostname TempHumidityRpi[1474]: AzDevice.IoTHubWorker[101] Device: S/N:1234-5678 ver:local-22ffc6e sensor:Physical SHTC3 ID#2183
-Feb 09 20:58:14 hostname TempHumidityRpi[1474]: AzDevice.IoTHubWorker[102] Model: dtmi:azdevice:temphumidity;1
-Feb 09 20:58:15 hostname TempHumidityRpi[1474]: Microsoft.Hosting.Lifetime[0] Application started. Hosting environment: Production; Content root path: /opt/TempHumidityRpi
+Feb 09 20:58:14 hostname I2cTempHumidityMonitor[1474]: AzDevice.IoTHubWorker[100] Started OK
+Feb 09 20:58:14 hostname I2cTempHumidityMonitor[1474]: AzDevice.IoTHubWorker[200] Initial State: OK Applied 3 keys
+Feb 09 20:58:14 hostname I2cTempHumidityMonitor[1474]: AzDevice.IoTHubWorker[101] Device: S/N:1234-5678 ver:local-22ffc6e sensor:Physical SHTC3 ID#2183
+Feb 09 20:58:14 hostname I2cTempHumidityMonitor[1474]: AzDevice.IoTHubWorker[102] Model: dtmi:azdevice:temphumidity;1
+Feb 09 20:58:15 hostname I2cTempHumidityMonitor[1474]: Microsoft.Hosting.Lifetime[0] Application started. Hosting environment: Production; Content root path: /opt/TempHumidityRpi
 Feb 09 20:58:15 hostname systemd[1]: Started Temperature+Humidity Example.
-Feb 09 20:58:20 hostname TempHumidityRpi[1474]: AzDevice.IoTHubWorker[300] Provisioning: OK. Device shtc3-ab-cd-ef-01-02-03 on Hub iothub-abc0123456789.azure-devices.net
-Feb 09 20:58:21 hostname TempHumidityRpi[1474]: AzDevice.IoTHubWorker[400] Connection: OK.
-Feb 09 20:58:24 hostname TempHumidityRpi[1474]: AzDevice.IoTHubWorker[500] Telemetry: OK 1 messages
-Feb 09 20:58:24 hostname TempHumidityRpi[1474]: AzDevice.IoTHubWorker[2100] Property: OK Reported 6 properties
+Feb 09 20:58:20 hostname I2cTempHumidityMonitor[1474]: AzDevice.IoTHubWorker[300] Provisioning: OK. Device shtc3-ab-cd-ef-01-02-03 on Hub iothub-abc0123456789.azure-devices.net
+Feb 09 20:58:21 hostname I2cTempHumidityMonitor[1474]: AzDevice.IoTHubWorker[400] Connection: OK.
+Feb 09 20:58:24 hostname I2cTempHumidityMonitor[1474]: AzDevice.IoTHubWorker[500] Telemetry: OK 1 messages
+Feb 09 20:58:24 hostname I2cTempHumidityMonitor[1474]: AzDevice.IoTHubWorker[2100] Property: OK Reported 6 properties
 ```
 
 Or if you copied the files over directly, you can launch it directly.
 
 ```
-$ cp config.toml TempHumidityRpi
-$ dotnet TempHumidityRpi/TempHumidityRpi.dll
+$ cp config.toml I2cTempHumidityMonitor
+$ dotnet I2cTempHumidityMonitor/I2cTempHumidityMonitor.dll
 ```
 
 Once you're all done later, you can stop the service, and/or remove it entirely:
 
 ```
-$ sudo systemctl stop temphumidity
-$ sudo apt remove temphumidityrpi
+$ sudo systemctl stop ic2thm
+$ sudo apt remove i2ctemphumiditymonitor
 ```
 
 ## View the Data in Azure IoT Explorer
@@ -265,7 +265,7 @@ Choose `IoT Plug and Play Settings` from the left menu, then `(+) Add`, then `Lo
 
 ![](./images/iot-explorer-1.png)
 
-Next, pick the `dtmi` subfolder under the `TempHumidityRpi` example.
+Next, pick the `dtmi` subfolder under the `I2cTempHumidityMonitor` example.
 
 ![](./images/iot-explorer-2.png)
 
@@ -290,7 +290,7 @@ box and click `Start`. As telemetry is reported, you'll see it here.
 
 ![](./images/iot-explorer-6.png)
 
-If you're impatient, you can tune how often telemetry is sent up by jumping over to the `Properties (writable)` screen for the `TelemtryPeriod` property. Enter something like `PT1S` to send telemetry every second.
+If you're impatient, you can tune how often telemetry is sent up by jumping over to the `Properties (writable)` screen for the `TelemetryPeriod` property. Enter something like `PT1S` to send telemetry every second.
 
 ### Device Information
 

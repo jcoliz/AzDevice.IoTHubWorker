@@ -1,6 +1,6 @@
 # AzDevice IoT Hub Worker
 
-This is a toolkit for quickly creating IoT Plug-and-Play compliant control software for Azure IoT Hub-connected devices using .NET.
+This is a toolkit for quickly creating IoT Plug and Play compliant control software for Azure IoT Hub-connected devices using .NET.
 
 ## Why?
 
@@ -14,7 +14,7 @@ This leaves the application to focus on only the solution-specific work of imple
 * [Install a .NET Worker Service on Linux](/docs/InstallOnLinux.md). The primary real-life usage of the IoT Hub Worker Service is running on Linux devices in the field. This guide shows how to install any .NET Worker Service into a running Linux system.
 * [Package a .NET Worker Service as a DEB](/docs/PackageAsDeb.md). Running on a Debian-based OS like Rasperry Pi OS or Ubuntu? The easiest way to move your code in place, and keep it up to date, is to package it as a DEB.
 * [Interact with physical sensors using .NET](/docs/DotNetIot.md)
-* [Interact with a ModBus sensor using .NET](/docs/FluentModBus.md)
+* [Interact with a Modbus sensor using .NET](/docs/FluentModBus.md)
 * [Connect physical sensors on Raspberry Pi to Azure IoT](/docs/RunOnRPi.md). This guide demonstrates how to model a physical temperature & humidity sensor with IoT Plug and Play, run on a Raspberry Pi, and send data from this sensor to Azure IoT Hub. 
 * [Add IoT Plug and Play capabilities to a device in a model-driven solution](/docs/CustomDtmi.md). Why I love IoT Plug and Play, and you should too!
 
@@ -24,6 +24,20 @@ There are some examples which help show how to use the IoT Hub Worker.
 
 * [TemperatureContoller](/examples/TemperatureController/). Canonical example, simulates a "dtmi:com:example:Thermostat;2" model, with all telemetry, properties, and commands.
 * [ClimateMontitor](/examples/ClimateMonitor/). Another example of implementing an existing model with simulated data. This one simulates "dtmi:com:example:climatemonitor;1".
-* [TempHumidityRpi](/examples/TempHumidityRpi/). This example is targeted toward a real physical sensor running on a Raspberry Pi. It will still simulate data running on a Windows PC as well.
-* [ModBus](/examples/ModBus/). This example shows how to connect to a sensor via ModBus. It will run on Windows or Linux, as it you can easily use a USB-to-RS485 dongle to make the physical connection on any machine.
- 
+* [I2cTempHumidityMonitor](/examples/I2cTempHumidityMonitor/). This example is targeted toward a real physical sensor running on a Raspberry Pi. For easy testing, you can run this on a Windows PC and generate simulated data.
+* [ModbusTempHumidityMonitor](/examples/ModbusTempHumidityMonitor/). This example shows how to connect to a sensor via Modbus. It will run on Windows or Linux, as you can easily use a USB-to-RS485 dongle to make the physical connection on any machine.
+
+## Feature Set
+
+* Automatically provision device using Device Provisioning Service
+* Make connection with Azure IoT Hub
+* Read initial configuration state from standard .NET configuration sources
+* Send telemetry automatically on a configurable period
+* Report actual properties automatically at increasingly longer intervals
+* Receive desired property updates, passing them through to component implementation
+* Receive commands from IoT Hub, passing them through to component implementation
+* Follows IoT Plug and Play conventions to enable a model-based solution
+* Automatically supply a standard DeviceInformation model
+* Detailed multi-level logging to help with troubleshooting
+* Integrates with systemd to run as a background service on Linux
+* Copious examples showing usage with simulated and phyiscal devices on a variety of busses

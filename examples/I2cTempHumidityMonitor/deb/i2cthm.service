@@ -1,5 +1,5 @@
 [Unit]
-Description=AzDevice I2C Temp/Humidity Monitor
+Description=AzDevice Example I2C Temp/Humidity Monitor
 
 [Service]
 Type=notify

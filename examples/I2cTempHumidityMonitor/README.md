@@ -1,4 +1,4 @@
-# Temperature and Humidity Example for Raspberry Pi
+# I2C-based Temperature and Humidity Monitor for Raspberry Pi
 
 ![RPi Zero 2W with SHTC3](/docs/images/thrpi.jpg)
 
@@ -9,6 +9,8 @@ run on a Raspberry Pi, connected to Azure IoT Hub.
 Along the way, it also serves as example for how to construct a new
 model using the [Digital Twins Definition Language](https://github.com/Azure/opendigitaltwins-dtdl)
 to meet the use cases posed by a custom scenario.
+
+Note that this example can work on any board which has an I<sup>2</sup>C bus available, supports the .NET runtime, and runs the .NET IoT Bindings. I've only tested in on Raspberry Pi.
 
 ## Bill of Materials
 
