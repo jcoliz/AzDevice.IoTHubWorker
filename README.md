@@ -8,6 +8,8 @@ The basic work of connecting with Azure IoT Hub, following the IoT Plug and Play
 My goal with the IoT Hub Worker is to write all that stuff just once. 
 This leaves the application to focus on only the solution-specific work of implementing the telemetry, properties, and commands of a particular interface.
 
+Ultimately this makes it much faster to bring up a new proof of concept connected to Azure IoT.
+
 ## How To...
 
 * [Get Started with Azure IoT](/docs/GettingStarted.md). This guide presents the PowerShell-based workflow I use to quickly bring up a new set of services and provision new devices. We can create and configure an IoT hub, as well as set up the device provisioning service, in seconds.

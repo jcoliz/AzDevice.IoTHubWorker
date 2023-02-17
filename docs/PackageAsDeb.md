@@ -1,20 +1,29 @@
 # Package a .NET Worker Service as a DEB
 
+## Why?
+Let's say you've built a .NET Worker Service, and already have it [installed on Linux](/docs/InstallOnLinux.md). 
+Now you need an easy way to quickly get all the files in the right place every time.
+You need to build a DEB package!
+
 ## Layout
 
-Fundamentally, a DEB package is an archive file, with the files therein located where you want them on the target system, plus a packing list (here called a 'control file'), and some scripts. This is the file layout for the Temperature Controller example:
+Fundamentally, a DEB package is an archive file, with the files therein located where you want them on the target system, plus a packing list (here called a 'control file'), and some scripts. 
+
+Let's use the [Temperature Controller](/examples/TemperatureController/) example from AzDevice.IoTHubWorker. Here is the file layout of the DEB package:
 
 * /opt/TemperatureController: Output of dotnet publish
 * /etc/systemd/system/tempcontroller.service: SystemD Unit file
 * /DEBIAN/control: Control file
 * /DEBIAN/{pre,post}{inst,rm}: Pre/post install/remove scripts
 
+The files in the `DEBIAN` directory won't be installed. They're giving instruction to the package manager toolchain.
+
 ## Control File
 
 The [control file](https://www.debian.org/doc/debian-policy/ch-controlfields.html) gives the packaging tools the necessary context
 and details about your package.
 
-Here's an example of what mine looks like for the Temperature Controller example:
+Using the Temperature Controller example again, here's an example of what mine looks like:
 
 ```
 Package: temperaturecontroller
@@ -78,20 +87,21 @@ basic stub, and adding on the information we know just now during the build proc
 
 ### Build on Azure Pipelines
 
-To build a DEB package out of a .NET application in Azure Pipelines, it is the same steps, just translated into Azure Pipelines YAML. You can check out the overall flow ([ci.yaml](/.azure/pipelines/ci.yaml)), and the DEB-packaging-specific steps ([publish-deb.yaml](/.azure/pipelines/steps/publish-deb.yaml)).
+To build a DEB package out of a .NET application in Azure Pipelines, it is the same steps described above, just translated into Azure Pipelines YAML. You can check out the overall flow I use ([ci.yaml](/.azure/pipelines/ci.yaml)), along with the DEB-packaging-specific steps ([publish-deb.yaml](/.azure/pipelines/steps/publish-deb.yaml)).
 
 ## See it in action
 
 For a complete step-by-step guide to building an AzDevice example project into a DEB file, and running it on Raspberry Pi,
-check out the * [Connect physical sensors on Raspberry Pi to Azure IoT](/docs/RunOnRPi.md) guide.
+check out the [Connect physical sensors on Raspberry Pi to Azure IoT](/docs/RunOnRPi.md) guide.
 
 ## Download from build server / Copy to target machine
 
 Download it from build server
 Copy it to target machine
 
-(7) Install with sudo apt install
+## Install with sudo apt install
 
+```
 james@brewbox:~$ sudo apt install ./TemperatureController_0.0.0-ci-2459_amd64.deb
 Reading package lists... Done
 Building dependency tree
@@ -107,22 +117,38 @@ Selecting previously unselected package temperaturecontroller.
 Preparing to unpack .../TemperatureController_0.0.0-ci-2459_amd64.deb ...
 Unpacking temperaturecontroller (0.0.0-ci-2459) ...
 Setting up temperaturecontroller (0.0.0-ci-2459) ...
+```
 
-(8) Copy over local config
+## You're done!
 
-(9) Start it as before
+At this point, you've packaged your .NET Worker Service as a DEB package, and installed it on the target machine. 
+From here, everything should work just as if you'd copied the files over directly.
 
-(10) Check the logs
+Start the service, and check status:
 
-Jan 25 20:18:54 brewbox systemd[1]: Starting Temperature Controller...
-Jan 25 20:18:54 brewbox TemperatureController[3590]: AzDevice.IoTHubWorker[100] Started OK
-Jan 25 20:18:54 brewbox TemperatureController[3590]: AzDevice.IoTHubWorker[200] Initial State: OK Applied 5 keys
-Jan 25 20:18:54 brewbox TemperatureController[3590]: AzDevice.IoTHubWorker[101] Device: Example Thermostat Controller S/N:1234567890-ABCDEF ver:0.0.0-ci-2459 dtmi:com:example:TemperatureController;2
-Jan 25 20:18:54 brewbox TemperatureController[3590]: Microsoft.Hosting.Lifetime[0] Application started. Hosting environment: Production; Content root path: /opt/TemperatureController
-Jan 25 20:18:54 brewbox systemd[1]: Started Temperature Controller.
-Jan 25 20:18:58 brewbox TemperatureController[3590]: AzDevice.IoTHubWorker[300] Provisioning: OK. Device tc-01 on Hub iothub-sp4mvwjwloirs.azure-devices.net
-Jan 25 20:18:58 brewbox TemperatureController[3590]: AzDevice.IoTHubWorker[400] Connection: OK.
-Jan 25 20:19:09 brewbox TemperatureController[3590]: AzDevice.IoTHubWorker[2300] Property: Component OK. Updated thermostat1.targetTemperature to 5000
-Jan 25 20:19:09 brewbox TemperatureController[3590]: AzDevice.IoTHubWorker[2300] Property: Component OK. Updated thermostat2.targetTemperature to 100
-Jan 25 20:19:10 brewbox TemperatureController[3590]: AzDevice.IoTHubWorker[500] Telemetry: OK 3 messages
-Jan 25 20:19:20 brewbox TemperatureController[3590]: AzDevice.IoTHubWorker[500] Telemetry: OK 3 messages
+```
+$ sudo systemctl start tempcontroller
+$ sudo systemctl status tempcontroller
+
+● tempcontroller.service - Temperature Controller
+     Loaded: loaded (/etc/systemd/system/tempcontroller.service; enabled; vendor preset: enabled)
+     Active: active (running) since Thu 2023-01-19 20:10:35 PST; 31s ago
+   Main PID: 17626 (TemperatureCont)
+      Tasks: 26 (limit: 9228)
+     Memory: 35.0M
+     CGroup: /system.slice/tempcontroller.service
+             └─17626 /opt/TemperatureController/TemperatureController
+
+Jan 19 20:10:34 brewbox TemperatureController[17626]: AzDevice.IoTHubWorker[102] Model: dtmi:com:example:TemperatureController;2
+Jan 19 20:10:34 brewbox TemperatureController[17626]: AzDevice.IoTHubWorker[200] Initial State: OK Applied 6 keys
+Jan 19 20:10:34 brewbox TemperatureController[17626]: AzDevice.IoTHubWorker[101] Device: Example.json Thermostat Controller.json 0.0.2
+Jan 19 20:10:35 brewbox TemperatureController[17626]: Microsoft.Hosting.Lifetime[0] Application started. Hosting environment: Production; Content root path: /opt/TemperatureController
+Jan 19 20:10:35 brewbox systemd[1]: Started Temperature Controller.
+```
+
+All finished for now? Stop the service and remove the package
+
+```
+$ sudo systemctl stop tempcontroller
+$ sudo apt remove temperaturecontroller
+```
