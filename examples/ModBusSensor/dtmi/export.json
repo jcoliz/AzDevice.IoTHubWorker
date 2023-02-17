@@ -1,10 +1,10 @@
 [
   {
     "@context": "dtmi:dtdl:context;2",
-    "@id": "dtmi:azdevice:modbusexample;1",
+    "@id": "dtmi:azdevice:modbustemphumiditymonitor;1",
     "@type": "Interface",
     "displayName": {
-      "en": "AzDevices Example ModBus Temp/Humidity Controller v1"
+      "en": "AzDevice Example Modbus Temp/Humidity Monitor v1"
     },
     "contents": [
       {
@@ -54,19 +54,6 @@
         }
       },
       {
-        "@type": "Command",
-        "name": "GetModBus",
-        "displayName": "Get Active ModBus Addresses",
-        "description": "This command returns all the modbus addresses which currently have units attached to them.",
-        "response": {
-          "name": "Addresses",
-          "schema": {
-            "@type": "Array",
-            "elementSchema": "integer"
-          }
-        }
-      },
-      {
         "@type": "Component",
         "name": "Sensor_1",
         "schema": "dtmi:azdevice:xy_md02;1"
@@ -88,7 +75,7 @@
     "@id": "dtmi:azdevice:xy_md02;1",
     "@type": "Interface",
     "displayName": {
-      "en": "XY-MD02 ModBus Humidity and Temperature Sensor"
+      "en": "XY-MD02 Modbus Humidity and Temperature Sensor"
     },
     "description": "XY-MD02 Temperature and Humidity Transmitter Detection Sensor Module Modbus SHT20 Temperature Sensor RS485 Signal Analog",
     "contents": [
@@ -123,9 +110,9 @@
         "name": "Address",
         "schema": "integer",
         "displayName": {
-          "en": "ModBus Server Address"
+          "en": "Modbus Server Address"
         },
-        "description": "Location on ModBus where this sensor is to be found",
+        "description": "Location on Modbus where this sensor is to be found",
         "writable": false
       },
       {
@@ -138,7 +125,7 @@
           "en": "Serial bus speed"
         },
         "description": "Speed of serial bus to be used with this sensor",
-        "writable": true
+        "writable": false
       },
       {
         "@type": [
@@ -191,16 +178,6 @@
         },
         "unit": "percent",
         "writable": false
-      },
-      {
-        "@type": "Command",
-        "name": "SetAddress",
-        "displayName": "Set New ModBus Address",
-        "description": "Move this sensor to a new address on ModBus.",
-        "request": {
-          "name": "Address",
-          "schema": "integer"
-        }
       }
     ]
   },
@@ -209,7 +186,7 @@
     "@id": "dtmi:azdevice:sonbest_sm7820;1",
     "@type": "Interface",
     "displayName": {
-      "en": "SonBest SM7820 ModBus Humidity and Temperature Sensor"
+      "en": "SonBest SM7820 Modbus Humidity and Temperature Sensor"
     },
     "description": "SM7820B using the standard RS485 bus MODBUS-RTU protocol, easy access to PLC, DCS and other instruments or systems for monitoring temperature,humidity state quantities.The internal use of high-precision sensing core and related devices to ensure high reliability and excellent long-term stability.",
     "contents": [
@@ -244,9 +221,9 @@
         "name": "Address",
         "schema": "integer",
         "displayName": {
-          "en": "ModBus Server Address"
+          "en": "Modbus Server Address"
         },
-        "description": "Location on ModBus where this sensor is to be found",
+        "description": "Location on Modbus where this sensor is to be found",
         "writable": false
       },
       {
@@ -288,7 +265,7 @@
           "en": "Serial bus speed"
         },
         "description": "Speed of serial bus to be used with this sensor",
-        "writable": true
+        "writable": false
       },
       {
         "@type": [
@@ -352,16 +329,6 @@
         },
         "unit": "percent",
         "writable": false
-      },
-      {
-        "@type": "Command",
-        "name": "SetAddress",
-        "displayName": "Set New ModBus Address",
-        "description": "Move this sensor to a new address on ModBus.",
-        "request": {
-          "name": "Address",
-          "schema": "integer"
-        }
       }
     ]
   },

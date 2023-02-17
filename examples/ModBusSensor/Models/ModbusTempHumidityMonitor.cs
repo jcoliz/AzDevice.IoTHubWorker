@@ -99,7 +99,7 @@ public class ModbusTempHumidityMonitor : IRootModel
     /// Identifier for this model
     /// </summary>
     [JsonIgnore]
-    public string dtmi => "dtmi:azdevice:modbusexample;1";
+    public string dtmi => "dtmi:azdevice:modbustemphumiditymonitor;1";
 
     /// <summary>
     /// Get an object containing all current telemetry
@@ -121,12 +121,6 @@ public class ModbusTempHumidityMonitor : IRootModel
     {
         if (key == "TelemetryPeriod")
             return TelemetryPeriod = JsonSerializer.Deserialize<string>(jsonvalue)!;
-
-        if (key == "SerialConnection")
-        {
-            // NOP for now
-            // TODO: Remove this
-        }
 
         throw new NotImplementedException($"Property {key} is not implemented on {dtmi}");
     }

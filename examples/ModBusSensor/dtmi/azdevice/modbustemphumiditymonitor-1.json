@@ -1,6 +1,6 @@
 {
     "@context": "dtmi:dtdl:context;2",
-    "@id": "dtmi:azdevice:modbusexample;1",
+    "@id": "dtmi:azdevice:modbustemphumiditymonitor;1",
     "@type": "Interface",
     "displayName": {
         "en": "AzDevice Example Modbus Temp/Humidity Monitor v1"
