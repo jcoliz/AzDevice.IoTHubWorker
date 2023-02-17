@@ -227,7 +227,7 @@ public class SonbestSm7820Model :  IComponentModel
             }
             catch (Exception ex)
             {
-                state._logger.LogError(3088, ex,"Sensor {sensor} Background Error", state.ToString());
+                state._logger.LogError(LogEvents.BackgroundError, ex,"Sensor {sensor} Background Error", state.ToString());
             }
 
             // Wait a bit to let the bus settle
@@ -255,7 +255,7 @@ public class SonbestSm7820Model :  IComponentModel
                 // Failed. Try again next time!
                 HoldingRegisterCache = null;
 
-                _logger.LogError(3087, ex, "Sensor {sensor} Background Error in UpdateHoldingRegisterCacheIfNeeded", this.ToString());
+                _logger.LogError(LogEvents.BackgroundCacheError, ex, "Sensor {sensor} Background Error in UpdateHoldingRegisterCacheIfNeeded", this.ToString());
             }
         }
 
@@ -319,7 +319,7 @@ public class SonbestSm7820Model :  IComponentModel
             // Failed! Try again next time
             InputRegisterCache = null;
 
-            _logger.LogError(3086, ex, "Sensor {sensor} Background Error in UpdateInputRegisterCache", this.ToString());
+            _logger.LogError(LogEvents.BackgroundInputsError, ex, "Sensor {sensor} Background Error in UpdateInputRegisterCache", this.ToString());
         }
     }
 
