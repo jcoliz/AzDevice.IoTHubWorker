@@ -1,12 +1,10 @@
-# Installing a .NET Worker Service on Linux
+# Install a .NET Worker Service on Linux
 
-## Prerequisite: A .NET Worker Service 
+Let's say you have a [.NET Worker Service](https://learn.microsoft.com/en-us/dotnet/core/extensions/workers) running, and now it's time to run that service on Linux. 
+This guide will go through the process I've used to accomplish this for my Azure IoT-connected devices. 
+That said, these steps will work fine for any worker service.
 
-This article assumes you already have a worker service running, and now it's time to run on Linux.
-You can follow along with the TemperatureController example, which employs my Azure IoT Device Worker
-service. However, these steps will work fine for any worker service.
-
-Check out [Worker Services in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/workers) for all the details.
+You can follow along with the [Temperature Controller](/examples/TemperatureController/) example from `AzDevice.IoTHubWorker`, which employs my Azure IoT Device Worker service.
 
 ## Configure Host Service for SystemD
 

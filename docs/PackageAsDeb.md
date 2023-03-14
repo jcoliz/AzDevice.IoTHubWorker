@@ -1,6 +1,7 @@
 # Package a .NET Worker Service as a DEB
 
 ## Why?
+
 Let's say you've built a .NET Worker Service, and already have it [installed on Linux](/docs/InstallOnLinux.md). 
 Now you need an easy way to quickly get all the files in the right place every time.
 You need to build a DEB package!
@@ -9,7 +10,7 @@ You need to build a DEB package!
 
 Fundamentally, a DEB package is an archive file, with the files therein located where you want them on the target system, plus a packing list (here called a 'control file'), and some scripts. 
 
-Let's use the [Temperature Controller](/examples/TemperatureController/) example from AzDevice.IoTHubWorker. Here is the file layout of the DEB package:
+Let's use the [Temperature Controller](/examples/TemperatureController/) example from `AzDevice.IoTHubWorker`. Here is the file layout of the DEB package:
 
 * /opt/TemperatureController: Output of dotnet publish
 * /etc/systemd/system/tempcontroller.service: SystemD Unit file

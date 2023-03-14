@@ -1,13 +1,20 @@
 # Getting started with Azure IoT Hub and IoT Plug-and-Play
 
+Azure IoT boasts a rich collection of tools and services you can use to connect
+your IoT devices to the cloud. From there, the universe of Azure services is
+available to build powerful business solutions.
+
+It's also pretty complex. In this Getting Started guide, I wanted to distill down
+and simplify the pathways I use to bring up proofs-of-concept and prototype projects quickly.
+
 ## Prerequisites
 
-* Powershell
-* .NET 7 SDK
-* Azure Subscription
-* Azure CLI
-* Azure IoT CLI Add-in
-* Azure IoT Explorer
+* **Azure Subscription**. Of course, you'll need an Azure Subscription. [Sign up for a free account](https://azure.microsoft.com/en-us/free/) to get started.
+* **Azure CLI**. Install the [Azure Command-Line Interface](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) on your development PC.
+* **Azure IoT CLI Extension**. Then install the [Azure IoT extension](https://github.com/Azure/azure-iot-cli-extension).
+* **Azure IoT Explorer**. Grab the [Azure IoT Explorer](https://learn.microsoft.com/en-us/azure/iot-fundamentals/howto-use-iot-explorer) for a really handy way to visualize and interact with your devices.
+* **Powershell**. All examples here run in PowerShell. Handily, you can [Install PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.3) on prettymuch anything these days! 
+* **.NET 7 SDK**. All my examples are in C# on .NET. Get the [.NET 7.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) to build and run the code examples.
 
 ## Bring up Services
 
@@ -18,9 +25,12 @@ finally wanted to run with. Check these into source control for an unlimited his
 of your experiments. Once you're finished, you can be certain the services will
 always be created exactly correctly, no guessing.
 
+The current set of templates and scripts are in my `AzDevice.IoTHubWorker` project,
+specifically the `.azure/deploy` directory.
+
 ### Create Resource Group
 
-1. Open a powershell window, and change to the `.azure/deploy` directory.
+1. In a powershell window, change to the `.azure/deploy` directory.
 2. Set `$env:RESOURCEGROUP` to the name of a resource group which does not yet exist in your Azure subscription
 3. Run `Create-ResourceGroup.ps1`
 
@@ -33,7 +43,7 @@ az group create --name $env:RESOURCEGROUP --location "West US 2"
 
 1. Run `Deploy-Services.ps1`
 
-This deploys an ARM template to create a new Azure IoT Hub and Device Provisioning Services instances 
+This deploys an ARM template to create a new Azure IoT Hub and Device Provisioning Services instance 
 in your resource group:
 ```powershell
 az deployment group create --name "HubDps-$(Get-Random)" --resource-group $env:RESOURCEGROUP --template-file "azuredeploy.json"
@@ -77,8 +87,7 @@ new variables.
 
 1. Run `Create-EnrollmentGroup.ps1` 
 
-This creates an enrollment group in the Device Provisioning Service. This will make
-it super easy to add new devices later:
+This creates a [symmetric key enrollment group](https://learn.microsoft.com/en-us/azure/iot-dps/how-to-legacy-device-symm-key?tabs=windows&pivots=programming-language-csharp) in the Device Provisioning Service. Using this will make it super easy to add new devices later.
 ```powershell
 # Generate keys
 $env:PK = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes("$(Get-Random)/$(Get-Random)"))
@@ -109,6 +118,10 @@ az iot dps enrollment-group compute-device-key --key $env:PK --registration-id $
 
 ### Generate Device Config (config.toml)
 
+All of the device-side configuration goes into `config.toml`, using the format that Azure IoT Edge
+expects for device configuration. Using the same format for all applications makes it easy to 
+move to Azure IoT Edge later.
+
 1. Run `Generate-DeviceConfig.ps1`
 
 This script uses `config.template.toml` as a template to generate a unique `config.toml` for this device,
@@ -116,9 +129,9 @@ by replacing the needed tokens with correct values based on your solution.
 
 ## Build/Run Device Software
 
-To make things easy, you can follow along with the TemperatureController example device software.
-This implements the [dtmi:com:example:TemperatureController;2](https://github.com/Azure/iot-plugandplay-models/blob/main/dtmi/com/example/temperaturecontroller-2.json) interface from the official [Azure/iot-plugandplay-models repository](https://github.com/Azure/iot-plugandplay-models).
-Along the way, you can see how IoT Plug-and-Play is a powerful tool for IoT application
+To get started quickly, you can follow along with the `TemperatureController` example device software from the `AzDevice.IoTHubWorker` project.
+This example implements the [dtmi:com:example:TemperatureController;2](https://github.com/Azure/iot-plugandplay-models/blob/main/dtmi/com/example/temperaturecontroller-2.json) interface from the official [Azure/iot-plugandplay-models repository](https://github.com/Azure/iot-plugandplay-models).
+Along the way, you can see how [IoT Plug and Play](https://learn.microsoft.com/en-us/azure/iot-develop/overview-iot-plug-and-play) is a powerful tool for IoT application
 development.
 
 ### Place config file
@@ -166,19 +179,58 @@ To get started:
 4. Enter the IoT Hub Connection String into the `Connection string` text box.
 5. Press `Save`
 6. Then, back on the main page, `-> View devices in this hub`
+7. Click the name of the device you previously provisioned and connected
+8. Click "IoT Plug and Play components" in the left-side navigation menu
+
+This brings up the IoT Plug and Play components screen for this device. From here, you can interact with the device according to the capabilities exposed in the IoT Plug and Play interface.
+
+![](./images/iot-explorer-tc-1.png)
 
 ## View Telemetry
 
+To watch the telemetry flow in, pick the `Telemetry` screen from the `thermostat1` component, then check the `Show modeled events`,
+box and click `Start`. As telemetry is reported, you'll see it here.
+
+![](./images/iot-explorer-tc-2.png)
+
 ## View/Set Properties
+
+You can check out the latest reported state of properties on the `Properties (read-only)` screen, as well as set writable properties to new values on the `Properties (writable)` screen
+
+![](./images/iot-explorer-tc-3.png)
+
+Note that when you update values, this will show up in the device software logs as well:
+
+```
+<6>AzDevice.IoTHubWorker[710] Property: Component OK. Updated thermostat1.targetTemperature to 50
+```
 
 ## Send Commands
 
+Finally, you can send commands to the device. For example, from the `Default component`, you can send the
+`reboot`
+
+![](./images/iot-explorer-tc-4.png)
+
+The device software in this example will accept the reboot command, log it, and then proceed to ignore it.
+
+```
+<6>AzDevice.IoTHubWorker[600] Command: OK reboot Response: {}
+```
+
 ## What's next
 
+From here, you might be interested to...
+
+* [Install a .NET Worker Service on Linux](/docs/InstallOnLinux.md)
+* [Package a .NET Worker Service as a DEB](/docs/PackageAsDeb.md)
+* [Send data to Azure IoT Hub from a physical Temperature/Humidity Sensor running on Raspberry Pi](/docs/RunOnRPi.md)
+
+Future articles in the series will cover...
+
+* Connect a Modbus sensor to Azure IoT Hub 
 * Explore the Azure IoT Device Worker using different device models
 * Create your OWN device model
-* Deploy to a Linux-based IoT device
 * Use Azure Pipelines to create a Continous Integration workflow deploying deb packages to a private deb repository
-* Deploy to Raspberry Pi
-* Send data from real sensors
 * Use Azure IoT Edge as an intelligent gateway
+  
