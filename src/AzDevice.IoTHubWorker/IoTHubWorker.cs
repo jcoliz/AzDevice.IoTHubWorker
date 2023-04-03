@@ -26,7 +26,7 @@ namespace AzDevice;
 /// Connects using DPS using the same config.toml as Azure IoT Edge
 /// </remarks>
 
-public sealed class IoTHubWorker : BackgroundService
+public class IoTHubWorker : BackgroundService
 {
 #region Injected Fields
 
@@ -111,7 +111,7 @@ public sealed class IoTHubWorker : BackgroundService
     /// Loads initial state of components out of config "InitialState" section
     /// </summary>
     /// <returns></returns>
-    private Task LoadInitialState()
+    protected Task LoadInitialState()
     {
         try
         {
@@ -181,7 +181,7 @@ public sealed class IoTHubWorker : BackgroundService
     /// (See examples for how this is done.)
     /// </remarks>
     /// <exception cref="ApplicationException">Thrown if provisioning fails (critical error)</exception>
-    private async Task ProvisionDevice()
+    protected async Task ProvisionDevice()
     {
         string GetConfig(string key)
         {
@@ -244,7 +244,7 @@ public sealed class IoTHubWorker : BackgroundService
     /// Open a connection to IoT Hub
     /// </summary>
     /// <exception cref="ApplicationException">Thrown if connection fails (critical error)</exception>
-    private async Task OpenConnection()
+    protected async Task OpenConnection()
     {
         try
         {
@@ -343,7 +343,7 @@ public sealed class IoTHubWorker : BackgroundService
     /// <summary>
     /// Send latest telemetry from root and all components
     /// </summary>
-    private async Task SendTelemetry()
+    protected async Task SendTelemetry()
     {
         try
         {
@@ -423,7 +423,7 @@ public sealed class IoTHubWorker : BackgroundService
     /// <see href="https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#telemetry"/>.</param>
     /// <param name="encoding">The character encoding to be used when encoding the message body to bytes. This defaults to utf-8.</param>
     /// <returns>A plug and play compatible telemetry message, which can be sent to IoT Hub. The caller must dispose this object when finished.</returns>
-    public Message CreateTelemetryMessage(object telemetry, string? componentName = default, Encoding? encoding = default)
+    protected Message CreateTelemetryMessage(object telemetry, string? componentName = default, Encoding? encoding = default)
     {
         Encoding messageEncoding = encoding ?? Encoding.UTF8;
         string payload = JsonSerializer.Serialize(telemetry);
