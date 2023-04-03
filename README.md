@@ -10,6 +10,50 @@ This leaves the application to focus on only the solution-specific work of imple
 
 Ultimately this makes it much faster to bring up a new proof of concept connected to Azure IoT.
 
+## Basic Idea
+
+The IoT Hub Worker is an Inversion of Control framework, which handles the communication between the device and IoT Hub. It will provision the device with DPS,
+then handle the initial IoT Hub setup and ongoing communication.
+
+You set this up by defining a `Program.cs` which looks like the example below. The `ControllerModel` class in this example contains the application-specific logic, which will
+be called by the IoT Hub Worker as needed. The [IRootModel](./src/AzDevice.IoTHubWorker/Models/IRootModel.cs) and [IComponentModel](./src/AzDevice.IoTHubWorker/Models/IComponentModel.cs) interfaces define the points of interaction where the application-specific logic can expect control. 
+
+```c#
+IHost host = Host.CreateDefaultBuilder(args)
+    .UseSystemd() 
+    .ConfigureServices(services =>
+    {
+        services.AddHostedService<IoTHubWorker>();
+        services.AddSingleton<IRootModel,ControllerModel>();
+    })
+    .ConfigureAppConfiguration(config =>
+    {
+        config.AddTomlFile("config.toml", optional: true, reloadOnChange: true);
+    })
+    .Build();
+
+host.Run();
+```
+
+To take control of the inner loop, while still taking advantage of the individual functions of the base class,  
+implement a derived class and override `ExecuteAsync()`. The individual components called from there could
+be invidually used by a derived class.
+
+## Feature Set
+
+* Automatically provision device using Device Provisioning Service
+* Make connection with Azure IoT Hub
+* Read initial configuration state from standard .NET configuration sources
+* Send telemetry automatically on a configurable period
+* Report actual properties automatically at increasingly longer intervals
+* Receive desired property updates, passing them through to component implementation
+* Receive commands from IoT Hub, passing them through to component implementation
+* Follows IoT Plug and Play conventions to enable a model-based solution
+* Automatically supply a standard DeviceInformation model
+* Detailed multi-level logging to help with troubleshooting
+* Integrates with systemd to run as a background service on Linux
+* Copious examples showing usage with simulated and phyiscal devices on a variety of busses
+
 ## How To...
 
 * [Get Started with Azure IoT](/docs/GettingStarted.md). This guide presents the PowerShell-based workflow I use to quickly bring up a new set of services and provision new devices. We can create and configure an IoT hub, as well as set up the device provisioning service, in seconds.
@@ -29,17 +73,3 @@ There are some examples which help show how to use the IoT Hub Worker.
 * [I2cTempHumidityMonitor](/examples/I2cTempHumidityMonitor/). This example is targeted toward a real physical sensor running on a Raspberry Pi. For easy testing, you can run this on a Windows PC and generate simulated data.
 * [ModbusTempHumidityMonitor](/examples/ModbusTempHumidityMonitor/). This example shows how to connect to a sensor via Modbus. It will run on Windows or Linux, as you can easily use a USB-to-RS485 dongle to make the physical connection on any machine.
 
-## Feature Set
-
-* Automatically provision device using Device Provisioning Service
-* Make connection with Azure IoT Hub
-* Read initial configuration state from standard .NET configuration sources
-* Send telemetry automatically on a configurable period
-* Report actual properties automatically at increasingly longer intervals
-* Receive desired property updates, passing them through to component implementation
-* Receive commands from IoT Hub, passing them through to component implementation
-* Follows IoT Plug and Play conventions to enable a model-based solution
-* Automatically supply a standard DeviceInformation model
-* Detailed multi-level logging to help with troubleshooting
-* Integrates with systemd to run as a background service on Linux
-* Copious examples showing usage with simulated and phyiscal devices on a variety of busses
