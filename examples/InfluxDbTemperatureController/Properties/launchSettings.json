@@ -1,0 +1,8 @@
+﻿{
+  "profiles": {
+    "TemperatureController": {
+      "commandName": "Project",
+      "dotnetRunMessages": true
+    }
+  }
+}

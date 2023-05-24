@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-TemperatureController-a5e32d87-617b-447c-814b-a866ad7a7b3c</UserSecretsId>
+    <RuntimeIdentifiers>win10-x64;linux-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Alexinea.Extensions.Configuration.Toml" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AzDevice.IoTHubWorker\AzDevice.IoTHubWorker.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="version.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="config.toml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="pwsh --command &quot; &amp;&apos;$(ProjectDir)scripts\Update-Version.ps1&apos; &gt; &apos;$(ProjectDir)version.txt&apos; &quot;" />
+  </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Include="version.txt" />  
+  </ItemGroup>
+
+</Project>

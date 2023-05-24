@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="InfluxDB.Client" Version="4.12.0" />
     <PackageReference Include="Microsoft.Azure.Devices.Client" Version="1.41.2" />
     <PackageReference Include="Microsoft.Azure.Devices.Provisioning.Client" Version="1.19.2" />
     <PackageReference Include="Microsoft.Azure.Devices.Provisioning.Transport.Http" Version="1.15.2" />

@@ -261,7 +261,7 @@ public class IoTHubWorker : BackgroundService
                 ModelId = _model.dtmi
             };
 
-            iotClient = DeviceClient.Create(result.AssignedHub, auth, TransportType.Mqtt, options);
+            iotClient = DeviceClient.Create(result.AssignedHub, auth, Microsoft.Azure.Devices.Client.TransportType.Mqtt, options);
             _logger.LogInformation(LogEvents.ConnectOK,"Connection: OK. {info}", iotClient.ProductInfo);
 
             // Read the current state of desired properties and set the local values as desired
