@@ -223,11 +223,15 @@ public class InfluxDbWorker : BackgroundService
             bucket = GetConfig("InfluxDB:bucket");
 
             client = new InfluxDBClient(url, token);
+            client.SetLogLevel(InfluxDB.Client.Core.LogLevel.None);
+
             if (! await client.PingAsync())
                 throw new ApplicationException($"Unable to ping InfluxDB on {url}");
 
             var version = client.VersionAsync();
-            _logger.LogInformation(LogEvents.ConnectOK,"Connection: OK. InfluxDB ver.{ver} on {url}",version,url);
+
+
+            _logger.LogInformation(LogEvents.ConnectOK,"Connection: OK. InfluxDB ver.{ver} on {url}",version,url);            
         }
         catch (Exception ex)
         {
@@ -261,7 +265,7 @@ public class InfluxDbWorker : BackgroundService
                 if (readings is not null)
                 {
                     // Send them
-                    await SendTelemetryMessageAsync(readings, new(string.Empty, _model));
+                    await SendTelemetryMessageAsync(readings, new("device", _model));
                     ++numsent;
                 }
 
