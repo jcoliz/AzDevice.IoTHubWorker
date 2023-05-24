@@ -22,10 +22,27 @@
             "args": [
                 "publish",
                 "${workspaceFolder}/InfluxDbTemperatureController.csproj",
+                "/output:bin/out",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Set Module Tag",
+            "type": "shell",
+            "command": "./scripts/SetModuleTag.ps1",
+            "dependsOn": [
+                "publish"
+            ]
+        },
+        {
+            "label": "Build Container",
+            "type": "shell",
+            "command": "./scripts/Build.ps1",
+            "dependsOn": [
+                "Set Module Tag"
+            ]
         },
         {
             "label": "watch",
