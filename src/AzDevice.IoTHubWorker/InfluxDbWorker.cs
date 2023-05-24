@@ -310,7 +310,7 @@ public class InfluxDbWorker : BackgroundService
         using (var writeApi = client!.GetWriteApi())
         {
             // Make a message out of it
-            var point = PointData.Measurement($"t-{component.Value.dtmi}")
+            var point = PointData.Measurement($"tel-{component.Value.dtmi}")
                 .Tag("device", deviceid)
                 .Tag("component", component.Key)
                 .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
@@ -319,7 +319,8 @@ public class InfluxDbWorker : BackgroundService
             var d1 = JsonSerializer.Deserialize<Dictionary<string, object>>(j1);
             foreach(var kvp in d1!)
             {
-                point = point.Field(kvp.Key, kvp.Value);
+                var el = (JsonElement)kvp.Value;
+                point = point.Field(kvp.Key,el.GetDouble());
             }
 
             // Send the message
