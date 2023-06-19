@@ -2,6 +2,8 @@
 
 This is a toolkit for quickly creating IoT Plug and Play compliant control software for Azure IoT Hub-connected devices using .NET.
 
+![Running on Raspberry Pi](docs/images/thrpi.jpg)
+
 ## Why?
 
 The basic work of connecting with Azure IoT Hub, following the IoT Plug and Play conventions, formatting messages, receiving commands or property updates--this all tends to look the same in each solution. 
@@ -12,8 +14,7 @@ Ultimately this makes it much faster to bring up a new proof of concept connecte
 
 ## Basic Idea
 
-The IoT Hub Worker is an Inversion of Control framework, which handles the communication between the device and IoT Hub. It will provision the device with DPS,
-then handle the initial IoT Hub setup and ongoing communication.
+The IoT Hub Worker is an Inversion of Control framework, which handles the communication between the device and IoT Hub. It will provision the device with DPS, then handle the initial IoT Hub setup and ongoing communication.
 
 You set this up by defining a `Program.cs` which looks like the example below. The `ControllerModel` class in this example contains the application-specific logic, which will
 be called by the IoT Hub Worker as needed. The [IRootModel](./src/AzDevice.IoTHubWorker/Models/IRootModel.cs) and [IComponentModel](./src/AzDevice.IoTHubWorker/Models/IComponentModel.cs) interfaces define the points of interaction where the application-specific logic can expect control. 
